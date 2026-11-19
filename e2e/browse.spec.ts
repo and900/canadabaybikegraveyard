@@ -43,7 +43,7 @@ test('counts the live tags by operator, and drops one that expires at the next r
     /Not sure 0$/,
   ])
   await expect(page.getByRole('region', { name: 'Map', exact: true })).toHaveAccessibleDescription(
-    'Map of the Inner West with 14 bikes tagged. A list view is available.',
+    'Map of Canada Bay with 14 bikes tagged. A list view is available.',
   )
 
   await sql(`UPDATE tags SET expires_at = now() WHERE id = '${LLEWELLYN_ST}'`)
@@ -167,7 +167,7 @@ test('leaves the map for another page without a script error', async ({ page }) 
   // Onto the map and off it within the page, so the map is torn down in place: by the header's name, then Back. (The
   // site links open new tabs.)
   await page.goto('/why')
-  await page.getByRole('banner').getByRole('link', { name: 'The Inner West E-bike Graveyard' }).click()
+  await page.getByRole('banner').getByRole('link', { name: 'The Canada Bay E-bike Graveyard' }).click()
   await expect(page.locator('[data-map-ready]')).toBeAttached()
   await page.goBack()
   await expect(page).toHaveURL('/why')

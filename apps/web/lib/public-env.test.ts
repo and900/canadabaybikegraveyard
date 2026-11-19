@@ -11,12 +11,12 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-it.each(['/tiles/inner-west.pmtiles', 'https://store.example/inner-west.pmtiles'])('accepts %s', async (url) => {
+it.each(['/tiles/canada-bay.pmtiles', 'https://store.example/canada-bay.pmtiles'])('accepts %s', async (url) => {
   vi.stubEnv('NEXT_PUBLIC_TILES_URL', url)
   expect((await import('./public-env')).TILES_URL).toBe(url)
 })
 
-it.each(['//store.example/inner-west.pmtiles', 'ftp://store.example/x', 'tiles.pmtiles'])('refuses %s', async (url) => {
+it.each(['//store.example/canada-bay.pmtiles', 'ftp://store.example/x', 'tiles.pmtiles'])('refuses %s', async (url) => {
   vi.stubEnv('NEXT_PUBLIC_TILES_URL', url)
   await expect(import('./public-env')).rejects.toThrow('NEXT_PUBLIC_TILES_URL must be a path')
 })

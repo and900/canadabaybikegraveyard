@@ -29,7 +29,7 @@ test.describe('the map screen shell', () => {
     const errors: string[] = []
     page.on('console', (message) => message.type() === 'error' && errors.push(message.text()))
     await page.goto('/')
-    await expect(page.getByRole('banner').getByRole('link', { name: 'The Inner West E-bike Graveyard' })).toBeVisible()
+    await expect(page.getByRole('banner').getByRole('link', { name: 'The Canada Bay E-bike Graveyard' })).toBeVisible()
     await expect((await siteLinks(page)).getByRole('link', { name: 'Why this page exists' })).toBeVisible()
     await page.keyboard.press('Escape')
     await expect(page.getByRole('region', { name: 'Map', exact: true })).toBeVisible()
@@ -75,7 +75,7 @@ test.describe('the map screen shell', () => {
   test('shows a 3 px focus ring on the header link', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'Tab moves through links on desktop browsers')
     await page.goto('/')
-    const home = page.getByRole('link', { name: 'The Inner West E-bike Graveyard' })
+    const home = page.getByRole('link', { name: 'The Canada Bay E-bike Graveyard' })
     while (!(await home.evaluate((link) => link === document.activeElement))) await page.keyboard.press('Tab')
     await expect(home).toHaveCSS('outline-width', '3px')
     await expect(home).toHaveCSS('outline-style', 'solid')
@@ -213,7 +213,9 @@ test('the text pages each have one h1 and headings in order, and pass axe', asyn
     await expectNoAxeViolations(page)
   }
   await page.goto('/why')
-  await expect(page.getByRole('main')).toContainText("I'm a resident of Enmore. I love the Inner West.")
+  await expect(page.getByRole('main')).toContainText(
+    'Shared e-bikes can be a cheap, healthy, climate-friendly way to get around.',
+  )
 })
 
 test('an unknown address is a 404', async ({ page }) => {

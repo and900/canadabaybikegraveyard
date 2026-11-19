@@ -9,7 +9,7 @@ const MARION_ST = '5eed0000-0000-4000-8000-000000000002'
 const MESSAGE =
   'I am reporting that there is a Lime e-bike blocking the footpath near Llewellyn St, Marrickville.\n\n' +
   'Coordinates: -33.904497, 151.171932\n' +
-  `Tagged on The Inner West E-bike Graveyard: http://localhost:3000/tag/${LLEWELLYN_ST}`
+  `Tagged on The Canada Bay E-bike Graveyard: http://localhost:3000/tag/${LLEWELLYN_ST}`
 const HREF =
   'mailto:support-au@li.me?subject=Lime%20e-bike%2C%20blocking%20footpath%2C%20Llewellyn%20St%2C%20Marrickville' +
   `&body=${encodeURIComponent(MESSAGE.replaceAll('\n', '\r\n'))}`
@@ -130,7 +130,7 @@ test.describe('Notify the service provider?', () => {
     await expect(message(page)).toHaveValue(
       'I am reporting that there is an Ario e-bike left in a park or reserve near Marion St, Leichhardt.\n\n' +
         'Coordinates: -33.883891, 151.155464\n' +
-        `Tagged on The Inner West E-bike Graveyard: http://localhost:3000/tag/${MARION_ST}`,
+        `Tagged on The Canada Bay E-bike Graveyard: http://localhost:3000/tag/${MARION_ST}`,
     )
     // Gmail, Outlook.com, the message, then Copy follow the link in the tab order of a desktop keyboard. (On a phone,
     // WebKit's Tab skips buttons and links.)

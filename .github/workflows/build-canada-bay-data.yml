@@ -1,0 +1,41 @@
+# Run by hand from the Actions tab: downloads the City of Canada Bay boundary, suburbs, streets and addresses from NSW
+# Spatial Services, rebuilds the data files, cuts the map tiles, and commits the results to main.
+name: Build Canada Bay data
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @iwb/shared data:fetch
+      - run: pnpm --filter @iwb/shared data:build
+      # The pinned go-pmtiles release, run only if its bytes match the digest GitHub recorded for it.
+      - env:
+          PMTILES_URL: https://github.com/protomaps/go-pmtiles/releases/download/v1.31.2/go-pmtiles_1.31.2_Linux_x86_64.tar.gz
+          PMTILES_SHA256: 3ed7dbf4ec2e6dfe5e25b6f70d1ffc932729f93c86db353bf514dd71010a312f
+        run: |
+          curl --silent --fail --location --output "$RUNNER_TEMP/pmtiles.tar.gz" "$PMTILES_URL"
+          echo "$PMTILES_SHA256  $RUNNER_TEMP/pmtiles.tar.gz" | sha256sum --check --strict
+          tar --extract --gzip --file "$RUNNER_TEMP/pmtiles.tar.gz" --directory "$RUNNER_TEMP" pmtiles
+          PATH="$RUNNER_TEMP:$PATH" pnpm tiles
+      - name: Commit the new data and tiles
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all packages/shared/data
+          git add --force apps/web/public/tiles/canada-bay.pmtiles
+          git diff --cached --quiet && echo "Nothing changed" && exit 0
+          git commit -m "Build Canada Bay data and map tiles"
+          git push

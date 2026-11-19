@@ -13,7 +13,7 @@ const StreetPicker = lazy(() => import('./StreetPicker').then((module) => ({ def
  */
 export type Spot = { lat: number; lng: number; street: string; suburb: string; picked?: true }
 
-export const OUTSIDE = 'That spot is outside the Inner West. Tap inside the gold line.'
+export const OUTSIDE = 'That spot is outside Canada Bay. Tap inside the gold line.'
 export const pinOn = (spot: Spot) => `Pin on ${spot.street}, ${spot.suburb}`
 
 /**

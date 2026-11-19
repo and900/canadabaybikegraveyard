@@ -20,7 +20,7 @@ export function Header() {
       </svg>
       <Link href="/" className="flex min-h-11 flex-1 items-center leading-tight font-bold">
         <span>
-          The Inner West <span className="whitespace-nowrap">E-bike</span> Graveyard
+          The Canada Bay <span className="whitespace-nowrap">E-bike</span> Graveyard
         </span>
       </Link>
       <Menu>

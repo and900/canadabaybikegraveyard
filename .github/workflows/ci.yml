@@ -48,7 +48,7 @@ jobs:
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       # On a cache hit this only installs the system libraries the browsers need.
       - run: pnpm exec playwright install --with-deps chromium webkit
-      # The real Inner West extract, cut once from the pinned build and cached until the script or the bounds change.
+      # The real Canada Bay extract, cut once from the pinned build and cached until the script or the bounds change.
       - id: tiles
         uses: actions/cache@v6
         with:

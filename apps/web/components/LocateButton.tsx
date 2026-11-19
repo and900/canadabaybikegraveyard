@@ -71,7 +71,7 @@ export async function locate(
         note: `Your phone is only giving an approximate location, about ${meters} m. Turning on Precise Location for your browser helps, or ${withMap ? 'tap the map or choose a street.' : 'choose a street.'}`,
       }
     const { inside, street, suburb } = geo.where(lat, lng)
-    if (!inside) return failed("You're outside the Inner West.")
+    if (!inside) return failed("You're outside Canada Bay.")
     if (accuracy > LOCATION_ACCURACY_METERS)
       return {
         note: `Your location is only accurate to about ${meters} m. ${instead('Tap where the bike is, or choose a street.')}`,

@@ -2,7 +2,7 @@
 // next.config.ts imports this file, so a bad value fails the build and `next start` rather than the map.
 
 /** The map tiles: a file on this site locally, the public Blob store in production. */
-export const TILES_URL = process.env.NEXT_PUBLIC_TILES_URL || '/tiles/inner-west.pmtiles'
+export const TILES_URL = process.env.NEXT_PUBLIC_TILES_URL || '/tiles/canada-bay.pmtiles'
 
 /** A whole URL's protocol, or '' for anything else. Not URL.canParse(), which iOS Safari 16 lacks (SPEC.md §12). */
 function protocol(url: string) {

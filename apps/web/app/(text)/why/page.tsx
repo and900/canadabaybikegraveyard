@@ -7,20 +7,16 @@ export default function WhyPage() {
     <>
       <h1>Why this page exists</h1>
       <p>
-        I&apos;m a resident of Enmore. I love the Inner West. I want people to have a cheap, healthy, climate-friendly
-        way to get around.
+        Shared e-bikes can be a cheap, healthy, climate-friendly way to get around. But too many end up dumped across
+        footpaths, ramps and parks in Canada Bay.
       </p>
       <p>
-        But shared e-bike providers have flooded the streets of the Inner West and don&apos;t have an adequate plan for
-        keeping our neighbourhoods safe and clean.
+        Dumped bikes are an accessibility problem for people using wheelchairs or mobility scooters and for parents with
+        prams.
       </p>
       <p>
-        Navigating these bikes is an accessibility issue for people using wheelchairs or mobility scooters and for
-        parents with prams. Personal opinion, but the bikes themselves are also an eyesore.
-      </p>
-      <p>
-        This site exists to make it easy to report nuisance e-bikes to the relevant businesses and to illustrate to our
-        council the scale of the problem for Inner West residents.
+        This site makes it easy to report nuisance e-bikes to the businesses that own them, and to show the City of
+        Canada Bay Council the scale of the problem.
       </p>
     </>
   )

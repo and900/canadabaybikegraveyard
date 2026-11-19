@@ -140,7 +140,7 @@ test('a photo restored after it was reported shows again on a page left and come
   await admin.close()
 
   // Away and back inside the site, so the page's code stays loaded.
-  await page.getByRole('banner').getByRole('link', { name: 'The Inner West E-bike Graveyard' }).click()
+  await page.getByRole('banner').getByRole('link', { name: 'The Canada Bay E-bike Graveyard' }).click()
   await expect(page).toHaveURL('/')
   await page.goBack()
   await thumbnailLoaded(page)

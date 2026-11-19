@@ -69,8 +69,8 @@ function save(name: string, collection: FeatureCollection) {
 
 mkdirSync(RAW, { recursive: true })
 
-const council = await query('NSW_Administrative_Boundaries_Theme', 8, "lganame = 'INNER WEST'", 'lganame')
-if (council.features.length !== 1) throw new Error(`expected one Inner West polygon, got ${council.features.length}`)
+const council = await query('NSW_Administrative_Boundaries_Theme', 8, "lganame = 'CANADA BAY'", 'lganame')
+if (council.features.length !== 1) throw new Error(`expected one Canada Bay polygon, got ${council.features.length}`)
 save('council', council)
 
 const [west, south, east, north] = turf.bbox(council)

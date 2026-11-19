@@ -202,7 +202,7 @@ export function MapScreen() {
           Skip to the list
         </a>
         <p id="map-summary" className="sr-only">
-          Map of the Inner West{tags && ` with ${bikes(tags.length)} tagged`}. A list view is available.
+          Map of Canada Bay{tags && ` with ${bikes(tags.length)} tagged`}. A list view is available.
         </p>
         {MapView && status !== 'failed' && (
           <MapView

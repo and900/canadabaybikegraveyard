@@ -27,7 +27,7 @@ function cornerName(corners: Place[], corner: Place) {
 function searchStatus(query: string, found: number | undefined) {
   if (found === undefined) return 'Loading streets…'
   if (!query.trim()) return 'Type part of its name.'
-  if (!found) return 'No street in the Inner West matches that.'
+  if (!found) return 'No street in Canada Bay matches that.'
   if (found > SHOWN) return `${found} streets match. Type more to narrow them down.`
   return `${found} ${found === 1 ? 'street matches' : 'streets match'}.`
 }

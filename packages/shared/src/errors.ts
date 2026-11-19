@@ -10,7 +10,7 @@ export const ERRORS = {
   tag_gone: { status: 410, message: 'This tag has already gone.' },
   photo_gone: { status: 410, message: 'This photo has already gone.' },
   too_large: { status: 413, message: 'That photo is too big. Try a smaller one.' },
-  outside_area: { status: 422, message: 'That spot is outside the Inner West.' },
+  outside_area: { status: 422, message: 'That spot is outside Canada Bay.' },
   bad_image: { status: 422, message: "That file isn't a photo we can use." },
   rate_limited: { status: 429, message: "You've reached the limit for now. Try again later." },
 } as const

@@ -16,7 +16,7 @@ import {
   undoInAdmin,
 } from './support'
 
-const OUTSIDE = 'That spot is outside the Inner West. Tap inside the gold line.'
+const OUTSIDE = 'That spot is outside Canada Bay. Tap inside the gold line.'
 
 test.beforeEach(() => resetDb())
 // Instant camera moves, so each tap lands on the map as it will stay.

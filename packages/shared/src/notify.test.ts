@@ -25,7 +25,7 @@ describe('operatorEmail', () => {
       message:
         'I am reporting that there is a Lime e-bike blocking the footpath near Llewellyn St, Marrickville.\n\n' +
         'Coordinates: -33.904497, 151.171932\n' +
-        'Tagged on The Inner West E-bike Graveyard: https://example.org/tag/5eed0000-0000-4000-8000-000000000003',
+        'Tagged on The Canada Bay E-bike Graveyard: https://example.org/tag/5eed0000-0000-4000-8000-000000000003',
       href:
         'mailto:support-au@li.me' +
         '?subject=Lime%20e-bike%2C%20blocking%20footpath%2C%20Llewellyn%20St%2C%20Marrickville' +

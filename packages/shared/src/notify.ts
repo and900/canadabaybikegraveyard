@@ -28,7 +28,7 @@ export function operatorEmail(tag: PublicTag, origin: string) {
   const message =
     `I am reporting that there is ${withArticle(bike)} ${SAYS[tag.problem]} near ${place}.\n\n` +
     `Coordinates: ${tag.lat}, ${tag.lng}\n` +
-    `Tagged on The Inner West E-bike Graveyard: ${origin}/tag/${tag.id}`
+    `Tagged on The Canada Bay E-bike Graveyard: ${origin}/tag/${tag.id}`
   // A mailto body breaks its lines with CRLF (RFC 6068).
   const body = encodeURIComponent(message.replaceAll('\n', '\r\n'))
   const [eTo, eSubject, eMessage] = [to, subject, message].map(encodeURIComponent)

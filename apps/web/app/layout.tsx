@@ -8,7 +8,7 @@ import { RESTORE_CHOICE } from '@/lib/motion'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: { default: 'The Inner West E-bike Graveyard', template: '%s · The Inner West E-bike Graveyard' },
+  title: { default: 'The Canada Bay E-bike Graveyard', template: '%s · The Canada Bay E-bike Graveyard' },
 }
 
 export const viewport: Viewport = { viewportFit: 'cover' }

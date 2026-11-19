@@ -330,7 +330,7 @@ test.describe('Use my location', () => {
     test.slow()
     await startTagging(page)
     await context.setGeolocation({ ...TOWN_HALL, accuracy: 10 })
-    await expectNoPin(page, "You're outside the Inner West. Tap the map or choose a street.")
+    await expectNoPin(page, "You're outside Canada Bay. Tap the map or choose a street.")
     // An approximate location, as iOS gives with Precise Location off, says what helps.
     await context.setGeolocation({ ...LLEWELLYN_ST, accuracy: 3000 })
     await expectNoPin(

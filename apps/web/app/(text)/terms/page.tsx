@@ -23,7 +23,7 @@ export default function TermsPage() {
       <p>We may remove any tag or photo at any time.</p>
 
       <h2>No affiliation</h2>
-      <p>This site isn&apos;t affiliated with Lime, Hello, Ario, Inner West Council or Transport for NSW.</p>
+      <p>This site isn&apos;t affiliated with Lime, Hello, Ario, City of Canada Bay Council or Transport for NSW.</p>
 
       {/* The map's "i" panel says the same; /list, which has no map, uses this data to choose a street (§7). */}
       <h2>Map and address data</h2>

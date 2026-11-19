@@ -1,6 +1,6 @@
-# The Inner West E-bike Graveyard
+# The Canada Bay E-bike Graveyard
 
-A simple, interactive map of Sydney's Inner West Council area where anyone can tag a dumped share bike
+A simple, interactive map of Sydney's City of Canada Bay Council area where anyone can tag a dumped share bike
 (Lime, Hello, Ario). MIT license.
 
 - Tags expire after 48 hours unless someone marks them **Still there**.
@@ -37,7 +37,7 @@ pnpm exec playwright install chromium webkit            # once, for the end-to-e
 | `pnpm db:up`     | Start Postgres in Docker and wait until it is healthy                             |
 | `pnpm db:down`   | Stop it (the data volume is kept)                                                 |
 | `pnpm db:reset`  | Empty the dev database, apply every migration and load the seed                   |
-| `pnpm tiles`     | Cut the Inner West map tiles out of the pinned Protomaps build (git-ignored)      |
+| `pnpm tiles`     | Cut the Canada Bay map tiles out of the pinned Protomaps build (git-ignored)      |
 | `pnpm dev`       | Both apps in development mode                                                     |
 | `pnpm start`     | Both apps from their production builds                                            |
 | `pnpm lint`      | ESLint, including the import rules, and Prettier                                  |
@@ -61,7 +61,7 @@ The site's icon is [`apps/web/app/icon.svg`](apps/web/app/icon.svg), the header'
 
 - **Tiles:** `pnpm tiles` runs [`apps/web/scripts/fetch-tiles.sh`](apps/web/scripts/fetch-tiles.sh), which needs the
   [`pmtiles` CLI](https://github.com/protomaps/go-pmtiles/releases) (`brew install pmtiles`). It writes
-  `apps/web/public/tiles/inner-west.pmtiles` (about 13 MB), which `next start` serves with range requests.
+  `apps/web/public/tiles/canada-bay.pmtiles` (about 13 MB), which `next start` serves with range requests.
 - **Label glyphs:** the map draws its labels in Atkinson Hyperlegible from signed-distance-field PBFs, range 0–255
   only, committed in `apps/web/public/glyphs/` (the font's licence is `apps/web/public/fonts/OFL.txt`). To make them
   again, put `AtkinsonHyperlegible-Regular.ttf` and `-Bold.ttf` from
