@@ -11,7 +11,7 @@ A simple, interactive map of Sydney's City of Canada Bay Council area where anyo
 
 ## Status
 
-Live at [innerwestbikegraveyard.com](https://innerwestbikegraveyard.com). Built with Claude Code.
+Adapted from [michael-lebot/innerwestbikegraveyard](https://github.com/michael-lebot/innerwestbikegraveyard) (MIT).
 
 ## Stack
 

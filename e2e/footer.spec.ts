@@ -2,8 +2,8 @@ import { expect, type Locator, type Page, test } from '@playwright/test'
 import { expectNoAxeViolations, menu, menuButton, openSiteLink, resetDb, siteLinks } from './support'
 
 const LLEWELLYN_ST = '5eed0000-0000-4000-8000-000000000003'
-const ADDRESS = 'hello@innerwestbikegraveyard.com'
-const REPO = 'https://github.com/michael-lebot/innerwestbikegraveyard'
+const ADDRESS = 'hello@allmythingsonline.com'
+const REPO = 'https://github.com/and900/canadabaybikegraveyard'
 const PAGES = ['/', '/list', `/tag/${LLEWELLYN_ST}`, '/why', '/privacy', '/accessibility', '/terms']
 
 const footer = (page: Page) => page.getByRole('contentinfo')

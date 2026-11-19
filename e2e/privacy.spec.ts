@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-const ADDRESS = 'hello@innerwestbikegraveyard.com'
+const ADDRESS = 'hello@allmythingsonline.com'
 
 test('the privacy page opens with the TLDR, and both it and the accessibility page give the contact address', async ({
   page,
