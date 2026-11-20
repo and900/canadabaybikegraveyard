@@ -23,10 +23,10 @@ const newVisitor = () => {
 }
 beforeEach(newVisitor)
 
-/** Tags a bike on Llewellyn St as this test's visitor, and gives its id. */
+/** Tags a bike on Broughton St as this test's visitor, and gives its id. */
 async function tagBike() {
   const id = crypto.randomUUID()
-  const body = JSON.stringify({ id, lat: -33.904497, lng: 151.171932, operator: 'lime', problem: 'blocking_footpath' })
+  const body = JSON.stringify({ id, lat: -33.85789, lng: 151.15052, operator: 'lime', problem: 'blocking_footpath' })
   const request = new NextRequest('http://localhost:3000/api/tags', {
     method: 'POST',
     headers: { ...headers, 'content-type': 'application/json' },

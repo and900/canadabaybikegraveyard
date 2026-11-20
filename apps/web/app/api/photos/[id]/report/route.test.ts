@@ -17,11 +17,11 @@ beforeEach(() => {
   headers = { cookie: `iwb_v=${id}`, 'x-forwarded-for': `2001:db8:${id.slice(0, 4)}:${id.slice(4, 8)}::1` }
 })
 
-/** A new tag on Llewellyn St with a photo, from a visitor of its own, and the photo's id. */
+/** A new tag on Broughton St with a photo, from a visitor of its own, and the photo's id. */
 async function newPhoto() {
   const visitor: Visitor = { visitorHash: crypto.randomUUID(), ipHash: crypto.randomUUID() }
   const id = crypto.randomUUID()
-  await createTag({ tag: { id, lat: -33.904497, lng: 151.171932, operator: 'lime', problem: 'damaged' }, visitor })
+  await createTag({ tag: { id, lat: -33.85789, lng: 151.15052, operator: 'lime', problem: 'damaged' }, visitor })
   const photo = { full: Buffer.from('full'), thumb: Buffer.from('thumb'), width: 1600, height: 1200 }
   return (await attachPhoto({ tagId: id, visitor, makePhoto: async () => photo })).tag!.photoId!
 }

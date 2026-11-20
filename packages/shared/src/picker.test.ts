@@ -50,44 +50,45 @@ describe('searchStreets', () => {
   const found = (query: string) => searchStreets(query).map(({ street, suburb }) => `${street}, ${suburb}`)
 
   it('finds a street in each suburb it runs through, names that start with the word first', () => {
-    expect(found('llew')).toEqual([
-      'Llewellyn La, Marrickville',
-      'Llewellyn St, Balmain',
-      'Llewellyn St, Marrickville',
-      'Llewellyn St, Newtown',
-      'Little Llewellyn St, Balmain',
+    expect(found('broughton')).toEqual(['Broughton La, Drummoyne', 'Broughton St, Concord', 'Broughton St, Drummoyne'])
+    expect(found('victoria')).toEqual([
+      'Victoria Ave, Concord West',
+      'Victoria Pl, Drummoyne',
+      'Victoria Rd, Drummoyne',
+      'Queen Victoria St, Drummoyne',
     ])
   })
 
   it('narrows by every word typed, the suburb included, in any case', () => {
-    expect(found('LLEW st marr')).toEqual(['Llewellyn St, Marrickville'])
+    expect(found('BROU st drum')).toEqual(['Broughton St, Drummoyne'])
   })
 
   it('ignores apostrophes, and finds nothing for nothing', () => {
-    expect(found('oconnor la')).toContain("O'Connor La, Marrickville")
+    expect(found("brou'ghton st drum")).toEqual(['Broughton St, Drummoyne'])
     expect(found(' ')).toEqual([])
   })
 
   it("lists each street's corners in order along it", () => {
-    const [llewellyn] = searchStreets('llewellyn st marrickville')
-    expect(llewellyn?.corners.map(([cross]) => cross)).toEqual([
-      'Enmore Rd',
-      'Scouller La',
-      'Black St',
-      "O'Connor La",
-      'Juliett St',
-      'Shelleys La',
-      'Lynch La',
+    const [broughton] = searchStreets('broughton st drummoyne')
+    expect(broughton?.corners.map(([cross]) => cross)).toEqual([
+      'Millar St',
+      'Gipps St',
+      'Ullathorne St',
+      'Henley St',
+      'Plunkett La',
+      'Broughton La',
+      'Thompson St',
+      'South St',
     ])
   })
 })
 
 describe('loadHouseNumbers', () => {
   it("loads a street's numbers from its suburb's file, each where that house is", async () => {
-    const [llewellyn] = searchStreets('llewellyn st marrickville')
-    const twelve = matchHouseNumber(await loadHouseNumbers(llewellyn!), '12')
+    const [broughton] = searchStreets('broughton st drummoyne')
+    const twelve = matchHouseNumber(await loadHouseNumbers(broughton!), '12')
     expect(twelve?.[0]).toBe('12')
-    expect(where(twelve![1], twelve![2])).toEqual({ inside: true, suburb: 'Marrickville', street: 'Llewellyn St' })
+    expect(where(twelve![1], twelve![2])).toEqual({ inside: true, suburb: 'Drummoyne', street: 'Broughton St' })
   })
 })
 

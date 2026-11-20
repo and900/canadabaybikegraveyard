@@ -7,25 +7,20 @@ import { where } from './geo'
 
 // §4.1's suburbs, wholly and partly inside the council.
 const WHOLLY_INSIDE =
-  'Ashfield, Balmain, Balmain East, Birchgrove, Dulwich Hill, Enmore, Haberfield, Leichhardt, Lewisham, Lilyfield, Marrickville, Petersham, Rozelle, Stanmore, Summer Hill, Sydenham, Tempe'
-const PARTLY_INSIDE =
-  'Annandale, St Peters, Newtown, Croydon, Camperdown, Hurlstone Park, Croydon Park, Ashbury, Mascot'
+  'Abbotsford, Breakfast Point, Cabarita, Canada Bay, Chiswick, Concord, Concord West, Drummoyne, Five Dock, Liberty Grove, Mortlake, North Strathfield, Rhodes, Rodd Point, Russell Lea, Wareemba'
+const PARTLY_INSIDE = 'Ashfield, Burwood, Croydon, Haberfield, Homebush, Strathfield, Sydney Olympic Park'
 
 describe('where', () => {
-  it('finds a point on Llewellyn St, Marrickville', () => {
-    expect(where(-33.904497, 151.171932)).toEqual({ inside: true, suburb: 'Marrickville', street: 'Llewellyn St' })
+  it('finds a point on Broughton St, Drummoyne', () => {
+    expect(where(-33.85789, 151.15052)).toEqual({ inside: true, suburb: 'Drummoyne', street: 'Broughton St' })
   })
 
-  it("counts the far footpath of King St, across the boundary in the City of Sydney's half of Newtown", () => {
-    expect(where(-33.896734, 151.179755)).toEqual({ inside: true, suburb: 'Newtown', street: 'King St' })
+  it("counts Arlington St, Croydon, 6.5 m outside the council's boundary but inside the 20 m strip", () => {
+    expect(where(-33.87307, 151.12603)).toEqual({ inside: true, suburb: 'Croydon', street: 'Arlington St' })
   })
 
-  it('counts the midline of Parramatta Rd, 7 m outside the boundary', () => {
-    expect(where(-33.871321, 151.122567)).toMatchObject({ inside: true, street: 'Parramatta Rd' })
-  })
-
-  it('refuses a point 30 m beyond the 20 m strip', () => {
-    expect(where(-33.896976, 151.180046)).toMatchObject({ inside: false })
+  it('refuses Acton St, Croydon, 48 m outside the boundary: about 28 m beyond the 20 m strip', () => {
+    expect(where(-33.87114, 151.11686)).toMatchObject({ inside: false, street: 'Acton St' })
   })
 })
 

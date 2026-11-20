@@ -65,7 +65,7 @@ beforeEach(async () => {
   await rm(env.LOCAL_BLOB_DIR, { recursive: true, force: true })
   await db.$executeRaw`
     INSERT INTO tags (id, lat, lng, suburb, street, operator, problem, expires_at)
-    VALUES (${TAG}::uuid, -33.904497, 151.171932, 'Marrickville', 'Llewellyn St', 'lime', 'damaged',
+    VALUES (${TAG}::uuid, -33.85789, 151.15052, 'Drummoyne', 'Broughton St', 'lime', 'damaged',
             now() + interval '1 hour')`
   await db.$executeRaw`
     INSERT INTO tag_events (tag_id, type, request_id, visitor_hash, ip_hash)
@@ -340,8 +340,8 @@ describe('pausing photo uploads (§4.6)', () => {
     expect(await uploadsPaused()).toBe(true)
     const tag = {
       id: crypto.randomUUID(),
-      lat: -33.904497,
-      lng: 151.171932,
+      lat: -33.85789,
+      lng: 151.15052,
       operator: 'lime',
       problem: 'damaged',
     } as const

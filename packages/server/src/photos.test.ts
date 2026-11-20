@@ -34,7 +34,7 @@ const PHOTO: NewPhoto = { full: Buffer.from('full'), thumb: Buffer.from('thumb')
 async function insertTag(id: string, status = 'active', secondsLeft = 3600) {
   await db.$executeRaw`
     INSERT INTO tags (id, lat, lng, suburb, street, operator, problem, status, expires_at)
-    VALUES (${id}::uuid, -33.904497, 151.171932, 'Marrickville', 'Llewellyn St', 'lime', 'blocking_footpath',
+    VALUES (${id}::uuid, -33.85789, 151.15052, 'Drummoyne', 'Broughton St', 'lime', 'blocking_footpath',
             ${status}::tag_status, now() + ${secondsLeft} * interval '1 second')`
   await db.$executeRaw`
     INSERT INTO tag_events (tag_id, type, request_id, visitor_hash, ip_hash)

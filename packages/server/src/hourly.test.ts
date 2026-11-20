@@ -33,9 +33,9 @@ async function seed() {
   await db.$executeRaw`TRUNCATE tags, rate_counters, daily_salts CASCADE`
   await db.$executeRaw`
     INSERT INTO tags (id, lat, lng, suburb, street, operator, problem, status, expires_at)
-    VALUES (${TAG}::uuid, -33.904497, 151.171932, 'Marrickville', 'Llewellyn St', 'lime', 'blocking_footpath',
+    VALUES (${TAG}::uuid, -33.85789, 151.15052, 'Drummoyne', 'Broughton St', 'lime', 'blocking_footpath',
             'active', now() + interval '1 hour'),
-           (${EXPIRED_TAG}::uuid, -33.904497, 151.171932, 'Marrickville', 'Llewellyn St', 'lime', 'damaged',
+           (${EXPIRED_TAG}::uuid, -33.85789, 151.15052, 'Drummoyne', 'Broughton St', 'lime', 'damaged',
             'removed', now() - interval '1 second')`
   await db.$executeRaw`
     INSERT INTO tag_events (tag_id, type, request_id, visitor_hash, ip_hash, at)

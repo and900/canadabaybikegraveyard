@@ -12,11 +12,11 @@ beforeAll(async () => {
     .toBuffer()
 })
 
-/** A new tag on Llewellyn St with a photo, from a visitor of its own, so rate limits never meet. */
+/** A new tag on Broughton St with a photo, from a visitor of its own, so rate limits never meet. */
 async function tagWithPhoto() {
   const visitor: Visitor = { visitorHash: crypto.randomUUID(), ipHash: crypto.randomUUID() }
   const id = crypto.randomUUID()
-  await createTag({ tag: { id, lat: -33.904497, lng: 151.171932, operator: 'lime', problem: 'damaged' }, visitor })
+  await createTag({ tag: { id, lat: -33.85789, lng: 151.15052, operator: 'lime', problem: 'damaged' }, visitor })
   const { tag } = await attachPhoto({
     tagId: id,
     visitor,

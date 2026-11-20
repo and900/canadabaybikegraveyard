@@ -8,7 +8,7 @@ import { POST as create, GET } from './route'
 
 vi.mock('@/lib/bot', () => ({ isBot: vi.fn(async () => false) }))
 
-const LLEWELLYN_ST = { lat: -33.904497, lng: 151.171932, operator: 'lime', problem: 'blocking_footpath' }
+const BROUGHTON_ST = { lat: -33.85789, lng: 151.15052, operator: 'lime', problem: 'blocking_footpath' }
 
 // Each test is a visitor of its own on an IP of its own, so their rate limits never meet and no table needs emptying.
 let headers: Record<string, string>
@@ -23,7 +23,7 @@ const request = (path: string, body: unknown, type = 'application/json') =>
     headers: { ...headers, 'content-type': type },
     body: typeof body === 'string' ? body : JSON.stringify(body),
   })
-const newTag = () => ({ id: crypto.randomUUID(), ...LLEWELLYN_ST })
+const newTag = () => ({ id: crypto.randomUUID(), ...BROUGHTON_ST })
 const post = (body: unknown) => create(request('/api/tags', body), { params: Promise.resolve({}) })
 const still = (id: string, body: unknown = { requestId: crypto.randomUUID() }) =>
   stillThere(request(`/api/tags/${id}/still-there`, body), { params: Promise.resolve({ id }) })
@@ -51,8 +51,8 @@ describe('POST /api/tags', () => {
     expect(await response.json()).toEqual({
       tag: {
         ...tag,
-        suburb: 'Marrickville',
-        street: 'Llewellyn St',
+        suburb: 'Drummoyne',
+        street: 'Broughton St',
         lastConfirmedAt: expect.any(String),
         expiresAt: expect.any(String),
         photoId: null,
@@ -104,7 +104,7 @@ describe('POST /api/tags', () => {
   })
 
   it('refuses a spot outside the council and its 20 m strip with 422', async () => {
-    await expectError(await post({ ...newTag(), lat: -33.896976, lng: 151.180046 }), 'outside_area')
+    await expectError(await post({ ...newTag(), lat: -33.87114, lng: 151.11686 }), 'outside_area')
   })
 
   it("stops a visitor past an hour's tags with 429, saying when to retry", { timeout: 60_000 }, async () => {

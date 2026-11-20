@@ -29,7 +29,7 @@ const HOUR = 3600
 function insertTag(id: string, status: string, secondsLeft: number) {
   return db.$executeRaw`
     INSERT INTO tags (id, lat, lng, suburb, street, operator, problem, status, expires_at)
-    VALUES (${id}::uuid, -33.904497, 151.171932, 'Marrickville', 'Llewellyn St', 'lime', 'blocking_footpath',
+    VALUES (${id}::uuid, -33.85789, 151.15052, 'Drummoyne', 'Broughton St', 'lime', 'blocking_footpath',
             ${status}::tag_status, now() + ${secondsLeft} * interval '1 second')`
 }
 
@@ -50,10 +50,10 @@ describe('listLiveTags', () => {
     const [tag] = await listLiveTags()
     expect(tag).toEqual({
       id: LIVE,
-      lat: -33.904497,
-      lng: 151.171932,
-      suburb: 'Marrickville',
-      street: 'Llewellyn St',
+      lat: -33.85789,
+      lng: 151.15052,
+      suburb: 'Drummoyne',
+      street: 'Broughton St',
       operator: 'lime',
       problem: 'blocking_footpath',
       lastConfirmedAt: expect.any(Date),
@@ -98,7 +98,7 @@ describe('database enums', () => {
 const alice: Visitor = { visitorHash: 'a'.repeat(64), ipHash: '1'.repeat(64) }
 const bob: Visitor = { visitorHash: 'b'.repeat(64), ipHash: '2'.repeat(64) }
 const NEW = '0a9e0000-0000-4000-8000-000000000001'
-const LLEWELLYN_ST: NewTag = { id: NEW, lat: -33.904497, lng: 151.171932, operator: 'hello', problem: 'knocked_over' }
+const BROUGHTON_ST: NewTag = { id: NEW, lat: -33.85789, lng: 151.15052, operator: 'hello', problem: 'knocked_over' }
 
 const row = async (id: string) =>
   (
@@ -122,8 +122,8 @@ const hoursLeft = async (id: string) =>
 
 describe('createTag', () => {
   it('adds a live tag for 48 hours, named from where(), with its created event', async () => {
-    const { tag } = await createTag({ tag: LLEWELLYN_ST, visitor: alice })
-    expect(tag).toMatchObject({ id: NEW, suburb: 'Marrickville', street: 'Llewellyn St', operator: 'hello' })
+    const { tag } = await createTag({ tag: BROUGHTON_ST, visitor: alice })
+    expect(tag).toMatchObject({ id: NEW, suburb: 'Drummoyne', street: 'Broughton St', operator: 'hello' })
     expect(await hoursLeft(NEW)).toBeCloseTo(48, 3)
     expect(await db.$queryRaw`SELECT type::text, request_id::text, visitor_hash, ip_hash FROM tag_events`).toEqual([
       { type: 'created', request_id: NEW, visitor_hash: alice.visitorHash, ip_hash: alice.ipHash },
@@ -132,7 +132,7 @@ describe('createTag', () => {
 
   it('refuses a spot outside the council and its 20 m strip, and stores nothing', async () => {
     await expect(
-      createTag({ tag: { ...LLEWELLYN_ST, lat: -33.896976, lng: 151.180046 }, visitor: alice }),
+      createTag({ tag: { ...BROUGHTON_ST, lat: -33.87114, lng: 151.11686 }, visitor: alice }),
     ).rejects.toMatchObject({
       code: 'outside_area',
     })
@@ -141,34 +141,34 @@ describe('createTag', () => {
   })
 
   it('§5.5 repeats: creating again with the same id returns the first tag, with one event and one count', async () => {
-    const first = await createTag({ tag: LLEWELLYN_ST, visitor: alice })
-    const again = await createTag({ tag: LLEWELLYN_ST, visitor: alice })
+    const first = await createTag({ tag: BROUGHTON_ST, visitor: alice })
+    const again = await createTag({ tag: BROUGHTON_ST, visitor: alice })
     expect(again).toEqual(first)
     expect(await events(NEW)).toEqual(['created'])
     expect(await counts()).toEqual([1, 1, 1])
   })
 
   it('refuses the same id from another visitor', async () => {
-    await createTag({ tag: LLEWELLYN_ST, visitor: alice })
-    await expect(createTag({ tag: LLEWELLYN_ST, visitor: bob })).rejects.toMatchObject({ code: 'conflict' })
+    await createTag({ tag: BROUGHTON_ST, visitor: alice })
+    await expect(createTag({ tag: BROUGHTON_ST, visitor: bob })).rejects.toMatchObject({ code: 'conflict' })
   })
 
   describe('with the street picked by name (§10.3)', () => {
-    // 106 Albion St, Annandale, where the nearest named street is the lane behind the house.
-    const ALBION_ST: NewTag = { id: NEW, lat: -33.88727, lng: 151.16679, operator: 'lime', problem: 'damaged' }
+    // 12 Adams St, Breakfast Point, where the nearest named street is the lane beside the house.
+    const ADAMS_ST: NewTag = { id: NEW, lat: -33.84673, lng: 151.10841, operator: 'lime', problem: 'damaged' }
 
     it('keeps a picked street within 60 m of the spot, where the nearest street is another', async () => {
-      expect(where(ALBION_ST.lat, ALBION_ST.lng).street).toBe('Albion La')
-      const { tag } = await createTag({ tag: { ...ALBION_ST, street: 'Albion St' }, visitor: alice })
-      expect(tag).toMatchObject({ suburb: 'Annandale', street: 'Albion St' })
+      expect(where(ADAMS_ST.lat, ADAMS_ST.lng).street).toBe('Spring Park La')
+      const { tag } = await createTag({ tag: { ...ADAMS_ST, street: 'Adams St' }, visitor: alice })
+      expect(tag).toMatchObject({ suburb: 'Breakfast Point', street: 'Adams St' })
     })
 
     it.each([
-      ['a street further away', 'King St'],
+      ['a street further away', 'Great North Rd'],
       ['a name no street has', 'Nowhere Rd'],
     ])('names the nearest street instead of %s', async (_, street) => {
-      const { tag } = await createTag({ tag: { ...ALBION_ST, street }, visitor: alice })
-      expect(tag).toMatchObject({ suburb: 'Annandale', street: 'Albion La' })
+      const { tag } = await createTag({ tag: { ...ADAMS_ST, street }, visitor: alice })
+      expect(tag).toMatchObject({ suburb: 'Breakfast Point', street: 'Spring Park La' })
     })
   })
 
@@ -177,7 +177,7 @@ describe('createTag', () => {
     await db.$transaction(async (tx) => {
       for (let i = 0; i < hourly; i++) await countAction(tx, 'create', alice)
     })
-    await expect(createTag({ tag: LLEWELLYN_ST, visitor: alice })).rejects.toMatchObject({ code: 'rate_limited' })
+    await expect(createTag({ tag: BROUGHTON_ST, visitor: alice })).rejects.toMatchObject({ code: 'rate_limited' })
     expect(await row(NEW)).toBeUndefined()
   })
 })
@@ -231,7 +231,7 @@ describe('confirmStillThere', () => {
 
   it('refuses a request id already used by another visitor, for another tag, or for something else', async () => {
     const requestId = crypto.randomUUID()
-    await createTag({ tag: LLEWELLYN_ST, visitor: alice })
+    await createTag({ tag: BROUGHTON_ST, visitor: alice })
     await still(LIVE, alice, requestId)
     await expect(still(LIVE, bob, requestId)).rejects.toMatchObject({ code: 'conflict' })
     await expect(still(NEW, alice, requestId)).rejects.toMatchObject({ code: 'conflict' })
