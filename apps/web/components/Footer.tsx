@@ -1,4 +1,4 @@
-import { FEEDBACK_EMAIL, REPO_URL } from '@iwb/shared'
+import { FEEDBACK_EMAIL } from '@iwb/shared'
 import { MotionToggle } from './MotionToggle'
 
 const PAGES = [
@@ -10,8 +10,8 @@ const PAGES = [
 
 const LINK = 'inline-flex min-h-[44px] min-w-[44px] items-center underline underline-offset-2'
 
-/** What the footer holds, and on a phone the header's menu (§4.7): feedback, the pages about the site, the source
- * code and Reduce motion. */
+/** What the footer holds, and on a phone the header's menu (§4.7): feedback, the pages about the site and Reduce
+ * motion. */
 export function SiteLinks() {
   return (
     <>
@@ -25,9 +25,6 @@ export function SiteLinks() {
           <span className="sr-only"> (opens in a new tab)</span>
         </a>
       ))}
-      <a href={REPO_URL} target="_blank" rel="noopener" className={LINK}>
-        Source code<span className="sr-only"> on GitHub (opens in a new tab)</span>
-      </a>
       <MotionToggle />
     </>
   )

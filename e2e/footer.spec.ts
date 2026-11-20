@@ -3,7 +3,6 @@ import { expectNoAxeViolations, menu, menuButton, openSiteLink, resetDb, siteLin
 
 const LLEWELLYN_ST = '5eed0000-0000-4000-8000-000000000003'
 const ADDRESS = 'hello@allmythingsonline.com'
-const REPO = 'https://github.com/and900/canadabaybikegraveyard'
 const PAGES = ['/', '/list', `/tag/${LLEWELLYN_ST}`, '/why', '/privacy', '/accessibility', '/terms']
 
 const footer = (page: Page) => page.getByRole('contentinfo')
@@ -15,16 +14,14 @@ const bike = (page: Page) => page.getByRole('region', { name: 'Map' }).getByRole
 /** Keeps the map loading, and its bike on screen, for up to its 15 s. */
 const holdMap = (page: Page) => page.route('**/*.pmtiles', () => {})
 
-/** The pages and the source code, each opening in a new tab, on the page at `path`. */
+/** The pages, each opening in a new tab, and no link to the source code, on the page at `path`. */
 async function expectSiteLinks(links: Locator, path: string) {
   for (const name of ['Why this page exists', 'Privacy', 'Accessibility', 'Terms'])
     await expect(links.getByRole('link', { name: `${name} (opens in a new tab)`, exact: true }), path).toHaveAttribute(
       'target',
       '_blank',
     )
-  const source = links.getByRole('link', { name: 'Source code on GitHub (opens in a new tab)', exact: true })
-  await expect(source, path).toHaveAttribute('href', REPO)
-  await expect(source, path).toHaveAttribute('target', '_blank')
+  await expect(links.getByRole('link', { name: /source code/i }), path).toHaveCount(0)
 }
 
 test.beforeEach(() => resetDb())
