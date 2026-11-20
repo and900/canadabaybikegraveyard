@@ -4,6 +4,7 @@ export const ERRORS = {
   invalid: { status: 400, message: 'Something was wrong with that request.' },
   bot: { status: 403, message: "We couldn't check your browser. Reload the page and try again." },
   not_allowed: { status: 403, message: 'Only the person who tagged this bike can add its photo.' },
+  not_yours: { status: 403, message: 'Only the browser that tagged this bike can mark it as no longer there.' },
   not_found: { status: 404, message: 'Not found.' },
   conflict: { status: 409, message: 'That request clashed with another. Reload and try again.' },
   uploads_paused: { status: 409, message: 'Photos are switched off for now. Your tag can still be added.' },

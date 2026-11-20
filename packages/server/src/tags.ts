@@ -17,6 +17,10 @@ import type { Visitor } from './visitors'
 
 /** Live: active, and its time has not run out by the database's clock. Expiry is never stored (§4.2). */
 export const LIVE = Prisma.sql`status = 'active' AND expires_at > now()`
+/** The visitor tagged this bike: only they may add its photo (§4.3) or mark it no longer there. For a query on tags. */
+export const taggedBy = (visitor: Visitor) => Prisma.sql`
+  EXISTS (SELECT 1 FROM tag_events
+          WHERE tag_id = tags.id AND type = 'created' AND visitor_hash = ${visitor.visitorHash})`
 /** A new tag's time, and a sighting's: 48 hours from now, never added on top (§4.2). */
 const LIFETIME = Prisma.sql`now() + ${TAG_LIFETIME_HOURS} * interval '1 hour'`
 
@@ -131,6 +135,28 @@ export function confirmStillThere({ tagId, requestId, visitor }: TagAction) {
     // Rolling back takes the event and the counts back too.
     if (!tag) throw new AppError('tag_gone')
     return { tag }
+  })
+}
+
+/**
+ * No longer there: the browser that tagged a live bike takes it off the map. It is a removal like an admin's, so an
+ * admin can undo it while the tag's time lasts. Any other browser is refused, as the site has no accounts to tell
+ * people apart.
+ */
+export function removeOwnTag({ tagId, requestId, visitor }: TagAction) {
+  return db.$transaction(async (tx) => {
+    const [found] = await tx.$queryRaw<{ mine: boolean }[]>`
+      SELECT ${taggedBy(visitor)} AS mine FROM tags WHERE id = ${tagId}::uuid`
+    if (!found) throw new AppError('tag_gone')
+    if (!found.mine) throw new AppError('not_yours')
+    // A repeat of an earlier request does nothing new.
+    if (!(await claimRequest(tx, { requestId, tagId, type: 'removed', visitor }))) return { tag: null }
+    await countAction(tx, 'remove', visitor, tagId)
+    const removed = await tx.$executeRaw`
+      UPDATE tags SET status = 'removed', removed_at = now() WHERE id = ${tagId}::uuid AND ${LIVE}`
+    // Rolling back takes the event and the counts back too.
+    if (!removed) throw new AppError('tag_gone')
+    return { tag: null }
   })
 }
 

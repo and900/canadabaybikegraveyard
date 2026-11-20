@@ -8,6 +8,7 @@ export {
   listRecentRemovals,
   listRecentTags,
   listTagEvents,
+  removeOwnTag,
   undoRemoval,
 } from './tags'
 export { takeDown } from './moderation'

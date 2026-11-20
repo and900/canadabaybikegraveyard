@@ -2,6 +2,7 @@
 import type { TagJson } from '@iwb/shared'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { isMine } from '@/lib/mine'
 import { send } from '@/lib/send'
 import { announce } from './Announcer'
 import { PRIMARY, SECONDARY } from './buttons'
@@ -16,6 +17,16 @@ export async function markStillThere(id: string) {
   const result: { tag?: TagJson | null; message: string } = sent.ok
     ? { tag: sent.data.tag, message: 'Marked still there' }
     : { tag: sent.error.code === 'tag_gone' ? null : undefined, message: sent.error.message }
+  announce(result.message)
+  return result
+}
+
+/** No longer there: only the browser that tagged the bike is allowed, which the server checks. */
+async function markGone(id: string) {
+  const sent = await send<{ tag: TagJson | null }>(`/api/tags/${id}/gone`, { requestId: crypto.randomUUID() })
+  const result: { ok: boolean; message: string } = sent.ok
+    ? { ok: true, message: 'Marked as no longer there' }
+    : { ok: sent.error.code === 'tag_gone', message: sent.error.message }
   announce(result.message)
   return result
 }
@@ -43,6 +54,21 @@ export function TagActions({
 
   // The buttons have gone, so the line that replaced them takes the focus.
   useEffect(() => status.current?.focus(), [gone])
+
+  const [mine, setMine] = useState(false)
+  // Read after load: the server can't see this browser's storage, so the first paint never has the button.
+  useEffect(() => setMine(isMine(id)), [id])
+
+  const actGone = async () => {
+    if (sending.current) return
+    sending.current = true
+    const { ok, message } = await markGone(id)
+    sending.current = false
+    if (!ok) return setError(message)
+    setError(undefined)
+    if (onDone) onDone(null)
+    else setGone(message)
+  }
 
   const act = async () => {
     if (sending.current) return
@@ -73,6 +99,11 @@ export function TagActions({
         <button type="button" className={outlined ? SECONDARY : PRIMARY} onClick={act}>
           Still there
         </button>
+        {mine && (
+          <button type="button" className={SECONDARY} onClick={actGone}>
+            No longer there
+          </button>
+        )}
         {error && <ErrorText>{error}</ErrorText>}
       </div>
     </>

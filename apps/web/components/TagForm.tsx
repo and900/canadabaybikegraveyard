@@ -1,6 +1,7 @@
 'use client'
 import { type Operator, OPERATORS, type Problem, PROBLEMS, type TagJson } from '@iwb/shared'
 import { type FormEvent, Fragment, useEffect, useRef, useState } from 'react'
+import { rememberMine } from '@/lib/mine'
 import { canRetry, send, type SendError } from '@/lib/send'
 import { announce } from './Announcer'
 import { PRIMARY, SECONDARY, SMALL } from './buttons'
@@ -149,6 +150,7 @@ export function TagForm({
         problem,
         ...(spot.picked && { street: spot.street }),
       })
+      if (sent.ok) rememberMine(id)
       if (!sent.ok) {
         // The answers stay, and so do the ids, so sending again can't add a tag twice.
         setSending(false)

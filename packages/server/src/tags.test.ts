@@ -14,6 +14,7 @@ import {
   listRecentRemovals,
   listRecentTags,
   listTagEvents,
+  removeOwnTag,
   undoRemoval,
 } from './tags'
 import type { Visitor } from './visitors'
@@ -338,5 +339,56 @@ describe('the admin reads', () => {
         ipActions: 0,
       },
     ])
+  })
+})
+
+describe('removeOwnTag', () => {
+  /** A live tag that `visitor` added, as createTag would leave it. */
+  const addedBy = async (visitor: Visitor) => {
+    await insertTag(NEW, 'active', 5 * HOUR)
+    await db.$executeRaw`
+      INSERT INTO tag_events (tag_id, type, request_id, visitor_hash, ip_hash)
+      VALUES (${NEW}::uuid, 'created', ${crypto.randomUUID()}::uuid, ${visitor.visitorHash}, ${visitor.ipHash})`
+  }
+  const gone = (visitor: Visitor, requestId = crypto.randomUUID()) => removeOwnTag({ tagId: NEW, requestId, visitor })
+
+  it('takes the tag off the map for the browser that added it, with a removed event', async () => {
+    await addedBy(alice)
+    expect(await gone(alice)).toEqual({ tag: null })
+    expect(await getLiveTag(NEW)).toBeNull()
+    expect(await row(NEW)).toMatchObject({ status: 'removed', removedAt: expect.any(Date) })
+    expect(await events(NEW)).toEqual(['created', 'removed'])
+  })
+
+  it('refuses any other browser, changing nothing', async () => {
+    await addedBy(alice)
+    await expect(gone(bob)).rejects.toMatchObject({ code: 'not_yours' })
+    expect(await row(NEW)).toMatchObject({ status: 'active' })
+    expect(await events(NEW)).toEqual(['created'])
+  })
+
+  it('answers a repeat of the same request with the same result, counting once', async () => {
+    await addedBy(alice)
+    const requestId = crypto.randomUUID()
+    await gone(alice, requestId)
+    expect(await gone(alice, requestId)).toEqual({ tag: null })
+    expect(await events(NEW)).toEqual(['created', 'removed'])
+  })
+
+  it('says a tag that has expired has gone, and changes nothing', async () => {
+    await insertTag(NEW, 'active', -HOUR)
+    await db.$executeRaw`
+      INSERT INTO tag_events (tag_id, type, request_id, visitor_hash, ip_hash)
+      VALUES (${NEW}::uuid, 'created', ${crypto.randomUUID()}::uuid, ${alice.visitorHash}, ${alice.ipHash})`
+    await expect(gone(alice)).rejects.toMatchObject({ code: 'tag_gone' })
+    expect(await row(NEW)).toMatchObject({ status: 'active' })
+    expect(await events(NEW)).toEqual(['created'])
+  })
+
+  it('can be undone by an admin while the tag has time left', async () => {
+    await addedBy(alice)
+    await gone(alice)
+    expect(await undoRemoval(NEW)).toBe('undone')
+    expect(await getLiveTag(NEW)).toMatchObject({ id: NEW })
   })
 })

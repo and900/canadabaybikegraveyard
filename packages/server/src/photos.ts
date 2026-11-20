@@ -9,7 +9,7 @@ import { deleteFiles, getFile, listFiles, putFile } from './blob'
 import { db } from './client'
 import { Prisma } from './generated/prisma/client'
 import { checkLimits, countAction } from './limits'
-import { getLiveTag, LIVE } from './tags'
+import { getLiveTag, LIVE, taggedBy } from './tags'
 import type { Visitor } from './visitors'
 
 /** A photo as the web app's processPhoto makes it: the WebP to keep, its thumbnail, and its size in pixels. */
@@ -17,10 +17,6 @@ export type NewPhoto = { full: Buffer; thumb: Buffer; width: number; height: num
 
 /** Photo uploads are paused (§4.6). */
 const PAUSED = Prisma.sql`(SELECT uploads_paused_at IS NOT NULL FROM site_state)`
-/** The visitor tagged this bike: only they may add its photo (§4.3). For a query on tags. */
-const taggedBy = (visitor: Visitor) => Prisma.sql`
-  EXISTS (SELECT 1 FROM tag_events
-          WHERE tag_id = tags.id AND type = 'created' AND visitor_hash = ${visitor.visitorHash})`
 
 /** Whether photo uploads are paused (§4.6). Tagging without a photo carries on as normal. */
 export async function uploadsPaused() {
