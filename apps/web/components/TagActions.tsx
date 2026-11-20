@@ -1,8 +1,8 @@
 'use client'
 import type { TagJson } from '@iwb/shared'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
-import { isMine } from '@/lib/mine'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { isMine, subscribeToStorage } from '@/lib/mine'
 import { send } from '@/lib/send'
 import { announce } from './Announcer'
 import { PRIMARY, SECONDARY } from './buttons'
@@ -55,9 +55,12 @@ export function TagActions({
   // The buttons have gone, so the line that replaced them takes the focus.
   useEffect(() => status.current?.focus(), [gone])
 
-  const [mine, setMine] = useState(false)
-  // Read after load: the server can't see this browser's storage, so the first paint never has the button.
-  useEffect(() => setMine(isMine(id)), [id])
+  // The server can't see this browser's storage, so the first paint never has the button.
+  const mine = useSyncExternalStore(
+    subscribeToStorage,
+    () => isMine(id),
+    () => false,
+  )
 
   const actGone = async () => {
     if (sending.current) return

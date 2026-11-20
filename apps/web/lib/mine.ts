@@ -20,6 +20,12 @@ export function rememberMine(id: string) {
   } catch {}
 }
 
+/** Calls back when another tab changes the list, for useSyncExternalStore. */
+export function subscribeToStorage(onChange: () => void) {
+  window.addEventListener('storage', onChange)
+  return () => window.removeEventListener('storage', onChange)
+}
+
 /** Whether this browser added the tag. */
 export function isMine(id: string) {
   return read().includes(id)
