@@ -166,7 +166,7 @@ export function overworldStyle(): StyleSpecification {
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: { 'line-color': GREYS[3], 'line-width': FILL_WIDTH },
       },
-      // The council wall: gold on a dark casing, which keeps it at 3:1 on grass and grey alike (assumption 12).
+      // The council wall: gold on a dark casing, which keeps it at 3:1 on the pale land and grey alike (assumption 12).
       {
         id: 'wall-casing',
         type: 'line',

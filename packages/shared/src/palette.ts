@@ -5,24 +5,24 @@ import type { Operator } from './config'
 /** Fills, lines and pattern pixels inside the council. */
 export const MAP_COLORS = {
   water: '#2f6fd6',
-  land: '#5cbf4a',
-  park: '#3c9a3a',
+  land: '#bfe3f7',
+  park: '#8fc3e3',
   road: '#ecd794',
   majorRoad: '#f7e7ad',
   lane: '#d9c27a',
   roadCasing: '#8a5a2b',
   rail: '#6b3f22',
-  suburbLine: '#2f7f2f',
-  tuft: '#3c9a3a',
-  tree: '#1d6b2a',
-  trunk: '#6b3f22',
+  suburbLine: '#4f86b8',
+  tuft: '#8fc3e3',
+  tree: '#3f78a8',
+  trunk: '#2f4f6f',
   flower: '#ffd23f',
 }
 
 /** Outside the council: greyscale steps, darkest first. */
 export const GREYS = ['#2b2b33', '#4a4a55', '#6e6e7a', '#9a9aa5', '#c4c4cc'] as const
 
-/** The council wall. Gold alone is 1.6:1 on the grass, so it has a dark casing (plan assumption 12). */
+/** The council wall. Gold alone has too little contrast on the pale land, so it has a dark casing (plan assumption 12). */
 export const WALL = { gold: '#ffd23f', casing: '#1f2328' }
 
 /** Map labels: dark text with a white halo, or in a white box with a grey edge. */
