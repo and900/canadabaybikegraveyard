@@ -30,24 +30,30 @@ export function TagFlow({
   onChangeLocation: () => void
   onClose: () => void
 }) {
-  const [draft, setDraft] = useState<Draft>(() => ({ bikes: [{ id: crypto.randomUUID() }], photo }))
+  const [draft, setDraft] = useState<Draft>(() => ({ id: crypto.randomUUID(), photo }))
   // The spot the visitor said "No, it's another bike" for.
   const [another, setAnother] = useState<Spot>()
 
   if (!spot) return null
   // Once added, the tags are among the live tags while the photo is sent: they are never one of these.
-  const others = tags.filter((tag) => !draft.bikes.some(({ id }) => id === tag.id))
+  const others = tags.filter((tag) => tag.id !== draft.id)
   const nearby = another === spot ? [] : nearbyTags(spot, others)
   return nearby.length ? (
     <MatchDialog tags={nearby} now={now} apply={apply} onNo={() => setAnother(spot)} onClose={onClose} />
   ) : (
     <TagForm
+      key={draft.id}
       spot={spot}
       draft={draft}
       onDraft={setDraft}
       uploadsPaused={uploadsPaused}
       apply={apply}
       onChangeLocation={onChangeLocation}
+      onAnother={() => {
+        // The bike just added is at this spot: it is no more a match for the next one than for itself.
+        setAnother(spot)
+        setDraft({ id: crypto.randomUUID() })
+      }}
       onClose={onClose}
     />
   )

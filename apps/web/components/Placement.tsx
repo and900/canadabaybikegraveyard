@@ -17,7 +17,9 @@ export const OUTSIDE = 'That spot is outside Canada Bay. Tap inside the gold lin
 export const pinOn = (spot: Spot) => `Pin on ${spot.street}, ${spot.suburb}`
 
 /**
- * The placement step's bar (§3): where the pin is, the other ways to set it, Use this spot and Cancel. Not a dialog:
+ * The placement step's bar (§3): where the pin is, the other ways to set it, and Cancel. A spot found or tapped goes
+ * straight to the form, so there is no Use this spot; Keep this spot shows only when Change location comes back here
+ * with a spot already chosen. Not a dialog:
  * the whole map stays usable beside it, by tap and by the keyboard crosshair (§10.3, §10.4). Without the map, as on
  * /list, the other ways are all there is.
  */
@@ -28,7 +30,7 @@ export function Placement({
   reading,
   onLocate,
   onChoose,
-  onUse,
+  onKeep,
   onCancel,
 }: {
   spot?: Spot
@@ -40,7 +42,8 @@ export function Placement({
   onLocate: (located: Located) => void
   /** A spot chosen by street, which needs no confirming on the map: the form comes next. */
   onChoose: (spot: Spot) => void
-  onUse: () => void
+  /** Back to the form with the spot it had, for Change location. */
+  onKeep: () => void
   onCancel: () => void
 }) {
   const heading = useRef<HTMLHeadingElement>(null)
@@ -74,22 +77,23 @@ export function Placement({
           Choose by street
         </button>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className={spot ? 'grid grid-cols-2 gap-2' : 'flex flex-col'}>
         <button type="button" className={SECONDARY} onClick={onCancel}>
           Cancel
         </button>
-        <button
-          type="button"
-          className={`${PRIMARY} disabled:opacity-50`}
-          disabled={!spot}
-          onClick={() => {
-            // A reading still on its way must not move the spot the visitor has just confirmed.
-            reading.stop()
-            onUse()
-          }}
-        >
-          Use this spot
-        </button>
+        {spot && (
+          <button
+            type="button"
+            className={PRIMARY}
+            onClick={() => {
+              // A reading still on its way must not move the spot the visitor has just confirmed.
+              reading.stop()
+              onKeep()
+            }}
+          >
+            Keep this spot
+          </button>
+        )}
       </div>
       {choosing && (
         <Suspense>

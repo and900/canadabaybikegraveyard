@@ -96,7 +96,11 @@ export function MapScreen() {
     reading.stop()
     const { inside, street, suburb } = (await loadGeo()).where(lat, lng)
     setNote(inside ? undefined : OUTSIDE)
-    if (inside) setSpot({ lat, lng, street, suburb })
+    if (inside) {
+      setSpot({ lat, lng, street, suburb })
+      // A tapped spot goes straight to the form; Change location there puts it right (§3).
+      setTagging('describe')
+    }
     announce(inside ? pinOn({ lat, lng, street, suburb }) : OUTSIDE)
   }
 
@@ -105,6 +109,8 @@ export function MapScreen() {
     setNote(located.note)
     setSpot(located.spot)
     setCentre(located.centre)
+    // A spot found goes straight to the form; the rough readings before it have none.
+    if (located.spot) setTagging('describe')
   }
 
   /** Chosen by street, the spot goes straight to the form, with the map behind it centred there (§10.3). */
@@ -278,7 +284,7 @@ export function MapScreen() {
               reading={reading}
               onLocate={locate}
               onChoose={choose}
-              onUse={() => setTagging('describe')}
+              onKeep={() => setTagging('describe')}
               onCancel={endTagging}
             />
             <Suspense>

@@ -15,11 +15,14 @@ export function Dialog({
   title,
   onCancel,
   busy,
+  showCancel = true,
   children,
 }: {
   title: string
   onCancel: () => void
   busy?: boolean
+  /** False on a closing screen whose own buttons say how to leave; Esc still calls `onCancel`. */
+  showCancel?: boolean
   children: React.ReactNode
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
@@ -66,9 +69,11 @@ export function Dialog({
           <h2 id="dialog-heading" ref={heading} tabIndex={-1} className="text-lg font-bold">
             {title}
           </h2>
-          <button type="button" className={`${SMALL} disabled:opacity-50`} disabled={busy} onClick={onCancel}>
-            Cancel
-          </button>
+          {showCancel && (
+            <button type="button" className={`${SMALL} disabled:opacity-50`} disabled={busy} onClick={onCancel}>
+              Cancel
+            </button>
+          )}
         </div>
         {children}
       </div>

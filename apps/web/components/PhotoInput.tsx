@@ -3,15 +3,24 @@ import { ERRORS } from '@iwb/shared'
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { shrinkPhoto } from '@/lib/photo'
 import { announce } from './Announcer'
-import { FOCUS_RING_WITHIN, SECONDARY, SMALL } from './buttons'
+import { FOCUS_RING_WITHIN, PRIMARY, SECONDARY, SMALL } from './buttons'
 import { PHOTO_TYPES } from './CameraButton'
 import { ErrorText } from './ErrorText'
 
 /**
- * The tag form's optional photo (§4.3): a file input behind a dashed button, which phones offer as the camera or the
- * library. The chosen photo is re-encoded at once and shown back, and the notice beside it says photos are public.
+ * The tag form's optional photo (§4.3): a file input behind a button, which phones offer as the camera or the library.
+ * The chosen photo is re-encoded at once and shown back, and the notice beside it says photos are public. `onSkip`
+ * adds "Skip photo" beside the button, for the step where choosing or skipping is what adds the bike.
  */
-export function PhotoInput({ photo, onPhoto }: { photo?: Blob; onPhoto: (photo?: Blob) => void }) {
+export function PhotoInput({
+  photo,
+  onPhoto,
+  onSkip,
+}: {
+  photo?: Blob
+  onPhoto: (photo?: Blob) => void
+  onSkip?: () => void
+}) {
   const [error, setError] = useState<string>()
   const input = useRef<HTMLInputElement>(null)
   const preview = useMemo(() => photo && URL.createObjectURL(photo), [photo])
@@ -50,16 +59,23 @@ export function PhotoInput({ photo, onPhoto }: { photo?: Blob; onPhoto: (photo?:
           </button>
         </div>
       )}
-      <label className={`${SECONDARY} cursor-pointer border-dashed ${FOCUS_RING_WITHIN}`}>
-        <input ref={input} type="file" accept={PHOTO_TYPES} onChange={choose} className="sr-only" />
-        {photo ? (
-          'Change photo'
-        ) : (
-          <>
-            <span aria-hidden="true">＋&nbsp;</span>Add a photo (optional)
-          </>
+      <div className={onSkip && !photo ? 'grid grid-cols-2 gap-2' : 'flex flex-col'}>
+        <label className={`${photo ? SECONDARY : PRIMARY} cursor-pointer ${FOCUS_RING_WITHIN}`}>
+          <input ref={input} type="file" accept={PHOTO_TYPES} onChange={choose} className="sr-only" />
+          {photo ? (
+            'Change photo'
+          ) : (
+            <>
+              <span aria-hidden="true">＋&nbsp;</span>Add a photo
+            </>
+          )}
+        </label>
+        {onSkip && !photo && (
+          <button type="button" className={SECONDARY} onClick={onSkip}>
+            Skip photo
+          </button>
         )}
-      </label>
+      </div>
       <div className="text-sm text-muted">
         <p>Photos are public. Leave out people, faces and number plates.</p>
         {/* A new tab, so the form keeps what is filled in. */}

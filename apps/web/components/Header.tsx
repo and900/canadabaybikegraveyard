@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { SiteLinks } from './Footer'
+import { HomeOnly } from './HomeOnly'
 import { Menu } from './Menu'
 
 export function Header() {
@@ -23,9 +24,12 @@ export function Header() {
           The Canada Bay <span className="whitespace-nowrap">E-bike</span> Graveyard
         </span>
       </Link>
-      <Menu>
-        <SiteLinks />
-      </Menu>
+      {/* The pages about the site are linked from the home page only, so the other pages stay uncluttered. */}
+      <HomeOnly>
+        <Menu>
+          <SiteLinks />
+        </Menu>
+      </HomeOnly>
     </header>
   )
 }

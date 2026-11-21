@@ -81,6 +81,8 @@ export function ListTagButton({ tags, now, uploadsPaused }: { tags: PublicTag[];
         onLocate={(located) => {
           setNote(located.note)
           setSpot(located.spot)
+          // A spot found goes straight to the form.
+          if (located.spot) setTagging('describe')
         }}
         onChoose={(chosen) => {
           reading.stop()
@@ -88,7 +90,7 @@ export function ListTagButton({ tags, now, uploadsPaused }: { tags: PublicTag[];
           setNote(undefined)
           setTagging('describe')
         }}
-        onUse={() => setTagging('describe')}
+        onKeep={() => setTagging('describe')}
         onCancel={end}
       />
       <Suspense>
