@@ -16,6 +16,7 @@ export function Menu({ children }: { children: React.ReactNode }) {
         ref={button}
         type="button"
         popoverTarget="menu"
+        data-site-menu
         aria-expanded={open}
         aria-controls="menu"
         aria-label="Menu"

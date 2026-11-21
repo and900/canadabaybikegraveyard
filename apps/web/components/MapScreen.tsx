@@ -173,6 +173,13 @@ export function MapScreen() {
     return () => document.removeEventListener('keydown', closeOnEscape)
   }, [close])
 
+  // The links to the site's pages hide while a bike is being tagged (globals.css).
+  const isTagging = !!tagging
+  useEffect(() => {
+    document.body.toggleAttribute('data-tagging', isTagging)
+    return () => document.body.removeAttribute('data-tagging')
+  }, [isTagging])
+
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>
     // Hydration can run before the first paint, so wait for a frame and then a task: the shell and the preview are on

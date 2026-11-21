@@ -81,3 +81,10 @@
     @slot;
   }
 }
+
+/* While a bike is being tagged (MapScreen sets the attribute), the links to the site's pages and the phone's menu
+   button step aside: the steps are all the screen shows. */
+body[data-tagging] footer,
+body[data-tagging] [data-site-menu] {
+  display: none;
+}
