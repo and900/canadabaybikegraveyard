@@ -6,7 +6,7 @@ import type { Operator } from './config'
 export const MAP_COLORS = {
   water: '#2f6fd6',
   land: '#bfe3f7',
-  park: '#8fc3e3',
+  park: '#b9e2a8',
   road: '#ecd794',
   majorRoad: '#f7e7ad',
   lane: '#d9c27a',
@@ -14,8 +14,8 @@ export const MAP_COLORS = {
   rail: '#6b3f22',
   suburbLine: '#4f86b8',
   tuft: '#8fc3e3',
-  tree: '#3f78a8',
-  trunk: '#2f4f6f',
+  tree: '#3f8f3a',
+  trunk: '#6b4a2b',
   flower: '#ffd23f',
 }
 
