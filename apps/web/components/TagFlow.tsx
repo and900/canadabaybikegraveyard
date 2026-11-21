@@ -11,7 +11,6 @@ import { type Draft, TagForm } from './TagForm'
  */
 export function TagFlow({
   spot,
-  photo,
   tags,
   now,
   uploadsPaused,
@@ -21,8 +20,6 @@ export function TagFlow({
 }: {
   /** The chosen spot, or undefined while the pin is being placed. */
   spot?: Spot
-  /** A photo taken with Take a photo of a bike before tagging started (§4.3). */
-  photo?: Blob
   tags: PublicTag[]
   now: Date
   uploadsPaused: boolean
@@ -30,7 +27,7 @@ export function TagFlow({
   onChangeLocation: () => void
   onClose: () => void
 }) {
-  const [draft, setDraft] = useState<Draft>(() => ({ bikes: [{ id: crypto.randomUUID() }], photo }))
+  const [draft, setDraft] = useState<Draft>(() => ({ bikes: [{ id: crypto.randomUUID() }] }))
   // The spot the visitor said "No, it's another bike" for.
   const [another, setAnother] = useState<Spot>()
 

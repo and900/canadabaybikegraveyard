@@ -23,12 +23,10 @@ export default async function ListPage() {
         </h1>
         <p className="text-sm text-muted">Tags disappear {TAG_LIFETIME_HOURS} hours after the last sighting.</p>
       </div>
-      {/* One row where both fit, as on the map screen; tagging takes the whole row. */}
-      <div className="flex flex-wrap gap-2">
+      {/* Where tagging starts, as on the map screen, with Map | List beneath. */}
+      <div className="flex flex-col gap-3">
         <ListTagButton tags={tags} now={now} uploadsPaused={paused} />
-        <div className="grow basis-36">
-          <ViewToggle current="/list" />
-        </div>
+        <ViewToggle current="/list" />
       </div>
       <TagList tags={tags} />
     </main>

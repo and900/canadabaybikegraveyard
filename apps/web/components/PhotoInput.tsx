@@ -4,8 +4,10 @@ import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { shrinkPhoto } from '@/lib/photo'
 import { announce } from './Announcer'
 import { FOCUS_RING_WITHIN, PRIMARY, SECONDARY, SMALL } from './buttons'
-import { PHOTO_TYPES } from './CameraButton'
 import { ErrorText } from './ErrorText'
+
+/** The photos a visitor can choose. iOS turns a HEIC photo into a JPEG for this list (§4.3). */
+const PHOTO_TYPES = 'image/jpeg,image/png,image/webp'
 
 /**
  * The tag form's optional photo (§4.3): a file input behind a button, which phones offer as the camera or the library.
@@ -66,7 +68,7 @@ export function PhotoInput({
             'Change photo'
           ) : (
             <>
-              <span aria-hidden="true">＋&nbsp;</span>Add a photo
+              <span aria-hidden="true">＋&nbsp;</span>Take or choose a photo
             </>
           )}
         </label>

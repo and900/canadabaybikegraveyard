@@ -5,8 +5,6 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useLiveTags } from '@/lib/use-live-tags'
 import { announce } from './Announcer'
-import { PRIMARY, PRIMARY_UNLESS_CAMERA } from './buttons'
-import { CameraButton, FINDING_YOU, locateAfterPhoto, TagLabel } from './CameraButton'
 import { CrowdChooser } from './CrowdChooser'
 import { Legend } from './Legend'
 import { type Located, unlessFinding, useReading } from './LocateButton'
@@ -46,10 +44,6 @@ export function MapScreen() {
   const [note, setNote] = useState<string>()
   // Where Use my location centres the map.
   const [centre, setCentre] = useState<Located['centre']>()
-  const tagButton = useRef<HTMLButtonElement>(null)
-  // The photo from Take a photo of a bike, which started tagging if there is one.
-  const [photo, setPhoto] = useState<Blob>()
-  const cameraInput = useRef<HTMLInputElement>(null)
   // Finding where the visitor is. Stopped early, it no longer says it is finding them.
   const reading = useReading(() => setNote(unlessFinding))
   const geo = useRef<Promise<Geo>>(null)
@@ -86,11 +80,6 @@ export function MapScreen() {
       throw error
     }))
 
-  const startTagging = () => {
-    void loadGeo()
-    setTagging('place')
-  }
-
   /** A tap or an arrow key: the pin moves there if it is inside the council or its 20 m strip (§4.1). */
   const place = async (lat: number, lng: number) => {
     reading.stop()
@@ -104,13 +93,21 @@ export function MapScreen() {
     announce(inside ? pinOn({ lat, lng, street, suburb }) : OUTSIDE)
   }
 
-  /** Use my location proposes a pin only when it is close enough, and centres the map on any position (§4.1). */
+  /** A rough reading on the way: where it puts the visitor is said and centred, and nothing is placed (§4.1). */
   const locate = (located: Located) => {
     setNote(located.note)
-    setSpot(located.spot)
     setCentre(located.centre)
-    // A spot found goes straight to the form; the rough readings before it have none.
-    if (located.spot) setTagging('describe')
+  }
+
+  /**
+   * Use my location proposes a pin only when it is close enough, and centres the map on any position (§4.1). A spot
+   * found goes straight to the form. Without one, the note says why and a tap on the map places the pin.
+   */
+  const located = (result: Located) => {
+    setNote(result.note)
+    setSpot(result.spot)
+    setCentre(result.centre)
+    setTagging(result.spot ? 'describe' : 'place')
   }
 
   /** Chosen by street, the spot goes straight to the form, with the map behind it centred there (§10.3). */
@@ -123,29 +120,14 @@ export function MapScreen() {
 
   const endTagging = () => {
     reading.stop()
-    const opener = photo ? cameraInput : tagButton
-    // Rendered now, so the button that started it is there to take the focus back.
     flushSync(() => {
       setTagging(undefined)
       setSpot(undefined)
       setNote(undefined)
       setCentre(undefined)
-      setPhoto(undefined)
     })
-    opener.current?.focus()
-  }
-
-  /** Take a photo of a bike: placing starts with the photo kept, and goes on to the form if the spot is found (§4.3). */
-  const startWithPhoto = async (taken: Blob) => {
-    const signal = reading.start()
-    setPhoto(taken)
-    setNote(FINDING_YOU)
-    startTagging()
-    const located = await locateAfterPhoto(true, signal, locate)
-    if (signal.aborted) return
-    locate(located)
-    announce(located.note)
-    if (located.spot) setTagging('describe')
+    // Back at the start of tagging, which takes the focus.
+    document.getElementById('placement-heading')?.focus()
   }
 
   const changeLocation = () => {
@@ -290,6 +272,7 @@ export function MapScreen() {
               note={note}
               reading={reading}
               onLocate={locate}
+              onResult={located}
               onChoose={choose}
               onKeep={() => setTagging('describe')}
               onCancel={endTagging}
@@ -297,7 +280,6 @@ export function MapScreen() {
             <Suspense>
               <TagFlow
                 spot={tagging === 'describe' ? spot : undefined}
-                photo={photo}
                 tags={tags ?? []}
                 now={now}
                 uploadsPaused={uploadsPaused}
@@ -317,22 +299,11 @@ export function MapScreen() {
               <p className="text-sm text-muted">Tags disappear {TAG_LIFETIME_HOURS} hours after the last sighting.</p>
             </div>
             <Legend tags={tags} />
-            {/* On a phone, its own row above the next (§4.3). */}
-            {!uploadsPaused && <CameraButton ref={cameraInput} onPhoto={startWithPhoto} />}
-            {/* One row where both fit, so the map keeps its height on a phone; they wrap at 320 px or large text. */}
-            <div className="flex flex-wrap gap-2">
-              <button
-                ref={tagButton}
-                type="button"
-                className={`${uploadsPaused ? PRIMARY : PRIMARY_UNLESS_CAMERA} grow-2 basis-44`}
-                onClick={startTagging}
-              >
-                {uploadsPaused ? 'Tag a dumped bike' : <TagLabel />}
-              </button>
-              {/* The panel has room for the list itself, so it needs no List toggle (§13). */}
-              <div className="grow basis-36 wide:hidden">
-                <ViewToggle current="/" />
-              </div>
+            {/* Where tagging starts: Use my location and Choose by street (§3). */}
+            <Placement note={note} reading={reading} onLocate={locate} onResult={located} onChoose={choose} />
+            {/* The panel has room for the list itself, so it needs no List toggle (§13). */}
+            <div className="wide:hidden">
+              <ViewToggle current="/" />
             </div>
             {tags && (
               <div className="hidden wide:block">

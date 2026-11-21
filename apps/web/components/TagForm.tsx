@@ -38,7 +38,7 @@ const addedMessage = (count: number) => (count > 1 ? `${count} bikes added` : 'B
 /**
  * The tag form (§3): whose bike and what's wrong for each bike at the spot, then the photo step, where adding a photo
  * or skipping it is what adds the bikes; "Add another bike here" is also there, so one photo can cover a pile of up
- * to five (§4.2). A photo taken before tagging started, or photos switched off, makes the step "Add to the map"
+ * to five (§4.2). Photos switched off make the step "Add to the map"
  * instead. Each bike is its own tag, sent one after another and the photo to each after them, so a photo that fails
  * leaves the tags added (§4.3). Then "Bike added" offers an email per bike (waiting for the photo), Home, and Undo.
  * No free text (§6).

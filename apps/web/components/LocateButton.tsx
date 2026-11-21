@@ -3,7 +3,7 @@ import { LOCATION_ACCURACY_METERS } from '@iwb/shared'
 import { useRef, useState } from 'react'
 import { readPosition } from '@/lib/position'
 import { announce } from './Announcer'
-import { SECONDARY } from './buttons'
+import { PRIMARY, SECONDARY } from './buttons'
 import type { Spot } from './Placement'
 
 /**
@@ -99,10 +99,17 @@ export function LocateButton({
   withMap,
   reading,
   onLocate,
+  onResult,
+  primary = false,
 }: {
   withMap: boolean
   reading: Reading
+  /** A rough reading on the way: shown and centred, never a spot. */
   onLocate: (located: Located) => void
+  /** Where the read ended: a spot if it is close enough, otherwise the note says why not. */
+  onResult: (located: Located) => void
+  /** The screen's one green button, as on the start of tagging. */
+  primary?: boolean
 }) {
   const [finding, setFinding] = useState(false)
 
@@ -114,12 +121,12 @@ export function LocateButton({
     const located = await locate(withMap, signal, onLocate)
     setFinding(false)
     if (signal.aborted) return
-    onLocate(located)
+    onResult(located)
     announce(located.note)
   }
 
   return (
-    <button type="button" className={SECONDARY} onClick={find}>
+    <button type="button" className={primary ? PRIMARY : SECONDARY} onClick={find}>
       {finding ? 'Finding you…' : 'Use my location'}
     </button>
   )
