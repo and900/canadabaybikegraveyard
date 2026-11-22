@@ -4,7 +4,7 @@ import { connection } from 'next/server'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: { default: 'Admin', template: '%s · Admin · E-bike Graveyard' },
+  title: { default: 'Admin', template: '%s · Admin · Community Watch' },
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -10,7 +10,7 @@ export default function TermsPage() {
 
       <h2>Photos</h2>
       <ul>
-        <li>Photos must show a share bike. People and number plates must not be the subject.</li>
+        <li>Photos must show the bike, graffiti or damage. People and number plates must not be the subject.</li>
         <li>
           That is a request to you, not consent from anyone who appears in a photo. A reported photo is hidden straight
           away, until we have checked it. Once we have checked a photo and kept it, later reports still reach us but no

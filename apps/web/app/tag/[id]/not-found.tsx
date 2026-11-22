@@ -9,9 +9,9 @@ export default function TagNotFound() {
     <main className="mx-auto w-full max-w-[70ch] flex-1 p-4">
       <h1 className="text-lg font-bold">This tag has gone</h1>
       <p className="mt-2">
-        Nobody has said it is still there for 48 hours, or it was taken down.{' '}
+        Nobody has said it is still there, or it was taken down.{' '}
         <Link href="/list" className="underline">
-          See the bikes still in the graveyard
+          See what is still on the list
         </Link>
         .
       </p>

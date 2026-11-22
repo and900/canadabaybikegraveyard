@@ -1,5 +1,5 @@
 'use client'
-import { bikes, pinOf, tagName, type PublicTag, type TagJson } from '@iwb/shared'
+import { type Category, categoryCount, pinOf, tagName, type PublicTag, type TagJson } from '@iwb/shared'
 import { useState } from 'react'
 import { SECONDARY } from './buttons'
 import { Dialog } from './Dialog'
@@ -13,12 +13,14 @@ import { TagDetails } from './TagDetails'
  * that one still there, and "No, it's another bike" carries on to the form.
  */
 export function MatchDialog({
+  category,
   tags,
   now,
   apply,
   onNo,
   onClose,
 }: {
+  category: Category
   tags: PublicTag[]
   now: Date
   apply: (id: string, tag: TagJson | null) => void
@@ -26,6 +28,7 @@ export function MatchDialog({
   onClose: () => void
 }) {
   const [error, setError] = useState<string>()
+  const isBike = category === 'bikes'
 
   const yes = async (tag: PublicTag) => {
     const { tag: updated, message } = await markStillThere(tag.id)
@@ -37,7 +40,11 @@ export function MatchDialog({
 
   return (
     <Dialog title="Is it one of these?" onCancel={onClose}>
-      <p>{tags.length === 1 ? 'A bike is' : `${bikes(tags.length)} are`} already tagged within 25 m of your pin.</p>
+      <p>
+        {tags.length === 1 ? `${isBike ? 'A bike is' : 'An item is'}` : `${categoryCount(category, tags.length)} are`}{' '}
+        already
+        {isBike ? ' tagged' : ' logged'} within 25 m of your pin.
+      </p>
       <ul className="flex flex-col gap-3">
         {tags.map((tag) => (
           <li key={tag.id} className="flex flex-col gap-3 rounded-[10px] border border-line p-3">
@@ -47,14 +54,14 @@ export function MatchDialog({
             </h3>
             <TagDetails tag={tag} now={now} />
             <button type="button" aria-describedby={`match-${tag.id}`} className={SECONDARY} onClick={() => yes(tag)}>
-              Yes, this bike
+              {isBike ? 'Yes, this bike' : 'Yes, this one'}
             </button>
           </li>
         ))}
       </ul>
       {error && <ErrorText>{error}</ErrorText>}
       <button type="button" className={SECONDARY} onClick={onNo}>
-        No, it&apos;s another bike
+        {isBike ? 'No, it&apos;s another bike' : 'No, it&apos;s a different one'}
       </button>
     </Dialog>
   )

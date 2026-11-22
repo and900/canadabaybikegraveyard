@@ -33,7 +33,7 @@ export function operatorEmail(tag: PublicTag, origin: string, registration?: str
     message =
       `I am reporting that there is ${withArticle(bike)} ${SAYS[tag.problem as keyof typeof SAYS]} near ${place}.\n\n` +
       `Coordinates: ${tag.lat}, ${tag.lng}\n` +
-      `Tagged on The Canada Bay E-bike Graveyard: ${link}`
+      `Tagged on Canada Bay Community Watch: ${link}`
   } else {
     const category = CATEGORIES[tag.category]
     subject = `${category.short}: ${PROBLEMS[tag.problem]}, ${place}`

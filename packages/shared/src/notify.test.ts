@@ -26,13 +26,13 @@ describe('operatorEmail', () => {
       message:
         'I am reporting that there is a Lime e-bike blocking the footpath near Llewellyn St, Marrickville.\n\n' +
         'Coordinates: -33.904497, 151.171932\n' +
-        'Tagged on The Canada Bay E-bike Graveyard: https://example.org/tag/5eed0000-0000-4000-8000-000000000003',
+        'Tagged on Canada Bay Community Watch: https://example.org/tag/5eed0000-0000-4000-8000-000000000003',
       href:
         'mailto:support-au@li.me' +
         '?subject=Lime%20e-bike%2C%20blocking%20footpath%2C%20Llewellyn%20St%2C%20Marrickville' +
         '&body=I%20am%20reporting%20that%20there%20is%20a%20Lime%20e-bike%20blocking%20the%20footpath%20near%20' +
         'Llewellyn%20St%2C%20Marrickville.%0D%0A%0D%0ACoordinates%3A%20-33.904497%2C%20151.171932%0D%0A' +
-        'Tagged%20on%20The%20Canada%20Bay%20E-bike%20Graveyard%3A%20https%3A%2F%2Fexample.org%2Ftag%2F' +
+        'Tagged%20on%20Canada%20Bay%20Community%20Watch%3A%20https%3A%2F%2Fexample.org%2Ftag%2F' +
         '5eed0000-0000-4000-8000-000000000003',
       gmail: expect.stringMatching(/^https:\/\/mail\.google\.com\/mail\/\?view=cm&fs=1&to=support-au%40li\.me&su=Lime/),
       outlook: expect.stringMatching(

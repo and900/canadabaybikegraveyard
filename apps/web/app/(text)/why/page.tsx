@@ -14,9 +14,10 @@ export default function WhyPage() {
         Dumped bikes are an accessibility problem for people using wheelchairs or mobility scooters and for parents with
         prams.
       </p>
+      <p>Parked cars blocking footpaths, graffiti and damaged footpaths and roads are problems for the same people.</p>
       <p>
-        This site makes it easy to report nuisance e-bikes to the businesses that own them, and to show the City of
-        Canada Bay Council the scale of the problem.
+        Canada Bay Community Watch makes it easy to tell the businesses or the council about these problems, and to show
+        the City of Canada Bay Council the scale of them.
       </p>
     </>
   )

@@ -21,7 +21,7 @@ export function Header() {
       </svg>
       <Link href="/" className="flex min-h-11 flex-1 items-center leading-tight font-bold">
         <span>
-          The Canada Bay <span className="whitespace-nowrap">E-bike</span> Graveyard
+          Canada Bay <span className="whitespace-nowrap">Community Watch</span>
         </span>
       </Link>
       {/* The pages about the site are linked from the home page only, so the other pages stay uncluttered. */}

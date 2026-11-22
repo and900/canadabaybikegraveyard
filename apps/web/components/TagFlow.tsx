@@ -38,7 +38,14 @@ export function TagFlow({
   const others = tags.filter((tag) => !draft.bikes.some(({ id }) => id === tag.id))
   const nearby = another === spot ? [] : nearbyTags(spot, others)
   return nearby.length ? (
-    <MatchDialog tags={nearby} now={now} apply={apply} onNo={() => setAnother(spot)} onClose={onClose} />
+    <MatchDialog
+      category={category}
+      tags={nearby}
+      now={now}
+      apply={apply}
+      onNo={() => setAnother(spot)}
+      onClose={onClose}
+    />
   ) : (
     <TagForm
       category={category}

@@ -13,12 +13,12 @@ export default function AccessibilityPage() {
       <h2>You don&apos;t need the map</h2>
       <ul>
         <li>
-          The <Link href="/list">list of bikes</Link> shows every tagged bike, grouped by suburb. It works with a screen
-          reader, a keyboard, and without JavaScript.
+          The <Link href="/list">list</Link> shows everything logged in the chosen category, grouped by suburb. It works
+          with a screen reader, a keyboard, and without JavaScript.
         </li>
-        <li>Each bike has its own page, linked from the list.</li>
+        <li>Each item has its own page, linked from the list.</li>
         <li>
-          You can tag a bike without the map by choosing a street, then a house number or the nearest corner, or by
+          You can add to the list without the map by choosing a street, then a house number or the nearest corner, or by
           using your location.
         </li>
       </ul>
