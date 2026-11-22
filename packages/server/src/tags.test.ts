@@ -54,6 +54,7 @@ describe('listLiveTags', () => {
       lng: 151.15052,
       suburb: 'Drummoyne',
       street: 'Broughton St',
+      category: 'bikes',
       operator: 'lime',
       problem: 'blocking_footpath',
       lastConfirmedAt: expect.any(Date),
