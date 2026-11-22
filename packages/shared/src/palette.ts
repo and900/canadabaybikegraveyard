@@ -1,6 +1,9 @@
 // Map art colours, from docs/mockups/graveyard-v3.html. contrast.test.ts checks pins, labels and the council wall
 // against every colour they can be drawn over.
-import type { Operator } from './config'
+import type { Category, Operator } from './config'
+
+/** What a pin is drawn as: a bike's operator, or the category of anything else. */
+export type PinKey = Exclude<Operator, 'council'> | Exclude<Category, 'bikes'>
 
 /** Fills, lines and pattern pixels inside the council. */
 export const MAP_COLORS = {
@@ -50,5 +53,9 @@ export const PINS = {
   hello: { fill: '#2566e6', line: '#1a1a1a', shine: '#bcd6ff', letter: '#ffffff' },
   ario: { fill: '#f5f5f5', line: '#1a1a1a', shine: '#ffffff', letter: '#1a1a1a' },
   not_sure: { fill: '#d9d9d9', line: '#1a1a1a', shine: '#ffffff', letter: '#1a1a1a' },
-} satisfies Record<Operator, { fill: string; line: string; shine: string; letter: string }>
+  // The other categories: orange, purple and red, none of them a bike operator's colour or the map's.
+  parking: { fill: '#ff9f1c', line: '#1a1a1a', shine: '#ffe0b0', letter: '#1a1a1a' },
+  graffiti: { fill: '#8a3ffc', line: '#1a1a1a', shine: '#d9c2ff', letter: '#ffffff' },
+  damage: { fill: '#ff5a4d', line: '#1a1a1a', shine: '#ffd0cc', letter: '#1a1a1a' },
+} satisfies Record<PinKey, { fill: string; line: string; shine: string; letter: string }>
 export const PIN_HALO = '#ffffff'

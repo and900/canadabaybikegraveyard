@@ -19,18 +19,6 @@ enum TagStatus {
   @@map("tag_status")
 }
 
-enum Problem {
-  blocking_footpath
-  knocked_over
-  blocking_ramp
-  in_waterway
-  in_park
-  damaged
-  abandoned
-
-  @@map("problem")
-}
-
 enum TagEventType {
   created
   still_there
@@ -74,9 +62,13 @@ model Tag {
   lng             Decimal    @db.Decimal(9, 6)
   suburb          String
   street          String
-  /// A key of OPERATORS in packages/shared/src/config.ts, so adding an operator needs no migration.
+  /// A key of CATEGORIES in packages/shared/src/config.ts. Every tag made before categories is a bike's.
+  category        String     @default("bikes")
+  /// A key of OPERATORS in packages/shared/src/config.ts, so adding an operator needs no migration. 'council' for
+  /// every category but bikes.
   operator        String
-  problem         Problem
+  /// A key of PROBLEMS in packages/shared/src/config.ts, one of its category's, so adding one needs no migration.
+  problem         String
   status          TagStatus  @default(active)
   createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz
   lastConfirmedAt DateTime   @default(now()) @map("last_confirmed_at") @db.Timestamptz

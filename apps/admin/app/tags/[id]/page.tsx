@@ -1,5 +1,14 @@
 import { getTag, listTagEvents } from '@iwb/server'
-import { dateTime, isExpired, OPERATORS, type PhotoStatus, photoAlt, PROBLEMS, TagParams } from '@iwb/shared'
+import {
+  CATEGORIES,
+  dateTime,
+  isExpired,
+  OPERATORS,
+  type PhotoStatus,
+  photoAlt,
+  PROBLEMS,
+  TagParams,
+} from '@iwb/shared'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Fragment } from 'react'
@@ -26,6 +35,7 @@ export default async function TagPage({ params, searchParams }: PageProps<'/tags
   const details = [
     ['Status', STATUS[tag.status]],
     ['Live', tag.live ? 'Yes' : 'No'],
+    ['Category', CATEGORIES[tag.category].label],
     ['Operator', OPERATORS[tag.operator].label],
     ['Problem', PROBLEMS[tag.problem]],
     ['Created', dateTime(tag.createdAt)],

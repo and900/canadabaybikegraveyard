@@ -1,11 +1,8 @@
 import { listLiveTags, uploadsPaused } from '@iwb/server'
-import { bikeCount, TAG_LIFETIME_HOURS } from '@iwb/shared'
 import type { Metadata } from 'next'
-import { ListTagButton } from '@/components/ListTagButton'
-import { TagList } from '@/components/TagList'
-import { ViewToggle } from '@/components/ViewToggle'
+import { ListScreen } from '@/components/ListScreen'
 
-export const metadata: Metadata = { title: 'List of bikes' }
+export const metadata: Metadata = { title: 'List' }
 
 /**
  * Every live tag, rendered on the server: reading it needs neither the map nor JavaScript. Tagging from here needs no
@@ -17,18 +14,7 @@ export default async function ListPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-[70ch] flex-1 flex-col gap-3 p-4">
-      <div>
-        <h1 className="text-lg font-bold">
-          {tags.length ? bikeCount(tags.length) : 'No bikes in the graveyard right now.'}
-        </h1>
-        <p className="text-sm text-muted">Tags disappear {TAG_LIFETIME_HOURS} hours after the last sighting.</p>
-      </div>
-      {/* Where tagging starts, as on the map screen, with Map | List beneath. */}
-      <div className="flex flex-col gap-3">
-        <ListTagButton tags={tags} now={now} uploadsPaused={paused} />
-        <ViewToggle current="/list" />
-      </div>
-      <TagList tags={tags} />
+      <ListScreen tags={tags} now={now} uploadsPaused={paused} />
     </main>
   )
 }

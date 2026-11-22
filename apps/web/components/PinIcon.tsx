@@ -1,4 +1,4 @@
-import { OPERATORS, PIN_HALO, PINS, type Operator } from '@iwb/shared'
+import { CATEGORIES, OPERATORS, PIN_HALO, PINS, type PinKey } from '@iwb/shared'
 import { pixels } from './pixels'
 
 // The header's 12 × 14 headstone without its empty top row: X is the outline, C the operator colour, W the shine. The
@@ -24,9 +24,9 @@ const SHAPE = pixels(STONE, 'XCW')
 const FILL = pixels(STONE, 'C')
 const SHINE = pixels(STONE, 'W')
 
-/** A pixel headstone, `scale` CSS px per pixel. Decorative: the operator is always named in text beside it. */
-export function PinIcon({ operator, scale = 2 }: { operator: Operator; scale?: number }) {
-  const colors = PINS[operator]
+/** A pixel headstone, `scale` CSS px per pixel. Decorative: the tag is always named in text beside it. */
+export function PinIcon({ pin, scale = 2 }: { pin: PinKey; scale?: number }) {
+  const colors = PINS[pin]
   return (
     <svg
       width={14 * scale}
@@ -49,7 +49,9 @@ export function PinIcon({ operator, scale = 2 }: { operator: Operator; scale?: n
         textAnchor="middle"
         dominantBaseline="central"
       >
-        {OPERATORS[operator].letter}
+        {pin in CATEGORIES
+          ? CATEGORIES[pin as keyof typeof CATEGORIES].letter
+          : OPERATORS[pin as keyof typeof OPERATORS].letter}
       </text>
     </svg>
   )

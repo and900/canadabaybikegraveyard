@@ -1,7 +1,17 @@
 // What crosses a boundary: request schemas, and the shapes the public site is given. Zod Mini, the smaller build,
 // which is all these need. The browser never loads Zod: it sends plain objects, and `parseTag` reads the live tags.
 import * as z from 'zod/mini'
-import { type Operator, OPERATORS, type Problem, PROBLEMS, REPORT_REASONS, type ReportReason } from './config'
+import {
+  CATEGORY_KEYS,
+  type Category,
+  fitsCategory,
+  type Operator,
+  OPERATORS,
+  type Problem,
+  PROBLEMS,
+  REPORT_REASONS,
+  type ReportReason,
+} from './config'
 
 /** What a schema's `parse` throws on input it refuses: a write answers it with 400 `invalid`. */
 export const ZodError = z.core.$ZodError
@@ -21,16 +31,23 @@ const coordinate = z.pipe(
 )
 const operators = Object.keys(OPERATORS).filter((key) => OPERATORS[key as Operator].active) as [Operator, ...Operator[]]
 
-/** A new tag (§4.2, §5.3). The browser makes its id, so sending it again can't make a second tag. */
-export const CreateTagBody = z.object({
-  id: z.uuid(),
-  lat: coordinate,
-  lng: coordinate,
-  operator: z.enum(operators),
-  problem: z.enum(Object.keys(PROBLEMS) as [Problem, ...Problem[]]),
-  // Chosen by name in the street picker (§10.3). The server keeps it only if the data has it near the spot.
-  street: z.optional(z.string().check(z.maxLength(100))),
-})
+/**
+ * A new tag (§4.2, §5.3). The browser makes its id, so sending it again can't make a second tag. A tag with no category
+ * is a bike's, as before categories. A bike names its operator and one of its problems; any other category names one
+ * of its own problems and no operator, since its reports go to the council.
+ */
+export const CreateTagBody = z
+  .object({
+    id: z.uuid(),
+    lat: coordinate,
+    lng: coordinate,
+    category: z.optional(z.enum(CATEGORY_KEYS)),
+    operator: z.optional(z.enum(operators)),
+    problem: z.enum(Object.keys(PROBLEMS) as [Problem, ...Problem[]]),
+    // Chosen by name in the street picker (§10.3). The server keeps it only if the data has it near the spot.
+    street: z.optional(z.string().check(z.maxLength(100))),
+  })
+  .check(z.refine((tag) => fitsCategory(tag)))
 export type NewTag = z.infer<typeof CreateTagBody>
 
 /** A photo's report (§4.3): why, and the id the browser made for it (§5.3). */
@@ -46,6 +63,8 @@ export type PublicTag = {
   lng: number
   suburb: string
   street: string
+  category: Category
+  /** A bike's operator; the council for any other category. */
   operator: Operator
   problem: Problem
   lastConfirmedAt: Date

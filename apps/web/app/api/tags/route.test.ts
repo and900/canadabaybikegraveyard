@@ -99,8 +99,20 @@ describe('POST /api/tags', () => {
     ['an operator it does not know', { operator: 'uber' }],
     ['a problem that is not on the list', { problem: 'ugly' }],
     ['no problem', { problem: undefined }],
+    ['a bike with no operator', { operator: undefined }],
+    ['a bike with a problem from another category', { problem: 'damage_pothole' }],
+    ['a category it does not know', { category: 'noise' }],
+    ['a parking report that names an operator', { category: 'parking', problem: 'parking_other' }],
   ])('refuses %s with 400', async (_, change) => {
     await expectError(await post({ ...newTag(), ...change }), 'invalid')
+  })
+
+  it('adds a report of another category, which names no operator', async () => {
+    const { operator, ...bike } = newTag()
+    expect(operator).toBeDefined()
+    const response = await post({ ...bike, category: 'graffiti', problem: 'graffiti_vandalism' })
+    expect(response.status).toBe(200)
+    expect((await response.json()).tag).toMatchObject({ category: 'graffiti', operator: 'council' })
   })
 
   it('refuses a spot outside the council and its 20 m strip with 422', async () => {
@@ -117,7 +129,7 @@ describe('POST /api/tags', () => {
 })
 
 describe('POST /api/tags/[id]/still-there', () => {
-  it('starts a live tag’s 48 hours again', async () => {
+  it('starts a live tag’s time again', async () => {
     const tag = newTag()
     const { tag: before } = await (await post(tag)).json()
     const response = await still(tag.id)

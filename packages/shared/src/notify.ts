@@ -1,10 +1,10 @@
 // "Notify the service provider?" (§4.2): an email to a tag's operator that the visitor's own email app sends.
-import { OPERATORS, type Problem, PROBLEMS } from './config'
+import { CATEGORIES, OPERATORS, PROBLEMS } from './config'
 import { bikeName, withArticle } from './format'
 import type { PublicTag } from './schemas'
 
 /** What's wrong, in the words that follow "there is a Lime e-bike". */
-const SAYS: Record<Problem, string> = {
+const SAYS: Record<(typeof CATEGORIES.bikes.problems)[number], string> = {
   blocking_footpath: 'blocking the footpath',
   knocked_over: 'knocked over',
   blocking_ramp: 'blocking a ramp or driveway',
@@ -17,18 +17,34 @@ const SAYS: Record<Problem, string> = {
 /**
  * The email about a tag to its operator, with its `mailto:` link and Gmail and Outlook.com compose pages for a device
  * with no email app, or null for a "Not sure" tag, which has no one to
- * write to. `origin` is the site's, as the visitor reached it, for the link to the tag's page.
+ * write to. `origin` is the site's, as the visitor reached it, for the link to the tag's page. `registration` is a
+ * parking report's number plate, which the visitor typed on their own phone: it goes in the email and nowhere else.
  */
-export function operatorEmail(tag: PublicTag, origin: string) {
+export function operatorEmail(tag: PublicTag, origin: string, registration?: string) {
   const to = OPERATORS[tag.operator].email
   if (!to) return null
-  const bike = bikeName(tag.operator)
   const place = [tag.street, tag.suburb].filter(Boolean).join(', ')
-  const subject = `${bike}, ${PROBLEMS[tag.problem].toLowerCase()}, ${place}`
-  const message =
-    `I am reporting that there is ${withArticle(bike)} ${SAYS[tag.problem]} near ${place}.\n\n` +
-    `Coordinates: ${tag.lat}, ${tag.lng}\n` +
-    `Tagged on The Canada Bay E-bike Graveyard: ${origin}/tag/${tag.id}`
+  const link = `${origin}/tag/${tag.id}`
+  let subject: string
+  let message: string
+  if (tag.category === 'bikes') {
+    const bike = bikeName(tag.operator)
+    subject = `${bike}, ${PROBLEMS[tag.problem].toLowerCase()}, ${place}`
+    message =
+      `I am reporting that there is ${withArticle(bike)} ${SAYS[tag.problem as keyof typeof SAYS]} near ${place}.\n\n` +
+      `Coordinates: ${tag.lat}, ${tag.lng}\n` +
+      `Tagged on The Canada Bay E-bike Graveyard: ${link}`
+  } else {
+    const category = CATEGORIES[tag.category]
+    subject = `${category.short}: ${PROBLEMS[tag.problem]}, ${place}`
+    message =
+      `I am reporting a problem near ${place}.\n\n` +
+      `Category: ${category.label}\n` +
+      `Issue: ${PROBLEMS[tag.problem]}\n` +
+      (registration ? `Registration: ${registration}\n` : '') +
+      `Coordinates: ${tag.lat}, ${tag.lng}\n` +
+      `Logged on Canada Bay Community Watch: ${link}`
+  }
   // A mailto body breaks its lines with CRLF (RFC 6068).
   const body = encodeURIComponent(message.replaceAll('\n', '\r\n'))
   const [eTo, eSubject, eMessage] = [to, subject, message].map(encodeURIComponent)

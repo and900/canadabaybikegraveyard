@@ -1,9 +1,12 @@
 'use client'
 import {
+  CATEGORIES,
+  type Category,
   type Operator,
   OPERATORS,
   operatorEmail,
   parseTag,
+  publicPhotos,
   type Problem,
   PROBLEMS,
   type PublicTag,
@@ -22,18 +25,23 @@ import { pinOn, type Spot } from './Placement'
 
 /** One bike at the spot. Its id, made when it joins the form, is its tag's from then on (§5.3). */
 export type Bike = { id: string; operator?: Operator; problem?: Problem }
-/** What the visitor has said so far, kept across Change location: the bikes at the spot and one photo of them (§4.2). */
-export type Draft = { bikes: Bike[]; photo?: Blob }
+/**
+ * What the visitor has said so far, kept across Change location: the bikes at the spot and one photo of them (§4.2).
+ * `registration` is a parking issue's optional number plate: it lives on the phone, and goes only in the email.
+ */
+export type Draft = { bikes: Bike[]; photo?: Blob; registration?: string }
 
 const OPERATOR_CHOICES = (Object.keys(OPERATORS) as Operator[])
   .filter((key) => OPERATORS[key].active)
   .map((key) => [key, OPERATORS[key].label] as const)
-const PROBLEM_CHOICES = (Object.keys(PROBLEMS) as Problem[]).map((key) => [key, PROBLEMS[key]] as const)
+const problemChoices = (category: Category) =>
+  (CATEGORIES[category].problems as readonly Problem[]).map((key) => [key, PROBLEMS[key]] as const)
 /** The most bikes one form adds (§4.2): a pile, kept small enough to check at a glance. */
 const MOST_BIKES = 5
 /** Bike 1's radios keep the names the form has always had; each other bike's are its own. */
 const nameOf = (field: 'operator' | 'problem', index: number) => (index ? `${field}-${index + 1}` : field)
-const addedMessage = (count: number) => (count > 1 ? `${count} bikes added` : 'Bike added')
+const addedMessage = (category: Category, count: number) =>
+  category !== 'bikes' ? 'Issue logged' : count > 1 ? `${count} bikes added` : 'Bike added'
 
 /**
  * The tag form (§3): whose bike and what's wrong for each bike at the spot, then the photo step, where adding a photo
@@ -44,6 +52,7 @@ const addedMessage = (count: number) => (count > 1 ? `${count} bikes added` : 'B
  * No free text (§6).
  */
 export function TagForm({
+  category,
   spot,
   draft,
   onDraft,
@@ -52,6 +61,7 @@ export function TagForm({
   onChangeLocation,
   onClose,
 }: {
+  category: Category
   spot: Spot
   draft: Draft
   onDraft: (draft: Draft) => void
@@ -73,11 +83,15 @@ export function TagForm({
   // The element to focus once a bike has been added to or taken out of the form.
   const focusNext = useRef<string>(null)
   const { bikes } = draft
+  const isBike = category === 'bikes'
+  const config = CATEGORIES[category]
+  // A private photo (parking) stays on the phone: it is chosen here, never sent, and goes in the visitor's own email.
+  const isPublic = publicPhotos(category)
   const several = bikes.length > 1
   const added = Object.keys(results)
   // An added bike stays a named group even if the bikes after it are removed, to say that it is added.
   const grouped = several || added.length > 0
-  const answered = (list: Bike[]) => list.every((bike) => bike.operator && bike.problem)
+  const answered = (list: Bike[]) => list.every((bike) => bike.problem && (!isBike || bike.operator))
   const ready = answered(bikes)
 
   useEffect(() => {
@@ -88,7 +102,8 @@ export function TagForm({
   const update = (index: number, answer: Partial<Bike>) => {
     const next = bikes.map((bike, i) => (i === index ? { ...bike, ...answer } : bike))
     onDraft({ ...draft, bikes: next })
-    if (!ready && answered(next) && !draft.photo && !uploadsPaused) announce('Add a photo, or skip it.')
+    if (!ready && answered(next) && !draft.photo && (!isPublic || !uploadsPaused))
+      announce(isPublic ? 'Add a photo, or skip it.' : 'Add a photo for your email, or just add it.')
   }
 
   /** A new bike, answered as the one above it, since a pile usually shares both answers (§4.2). */
@@ -142,6 +157,8 @@ export function TagForm({
     setSending(true)
     setFailure(undefined)
     if (several) announce(`Adding ${bikes.length} bikes…`)
+    // A photo kept on the phone is never sent.
+    const upload = isPublic ? photo : undefined
     const done = { ...results }
     for (const { id, operator, problem } of bikes) {
       // Each is on the map as soon as it is added. The first not answered for is sent again, as its answer may have been
@@ -151,7 +168,8 @@ export function TagForm({
         id,
         lat: spot.lat,
         lng: spot.lng,
-        operator,
+        category,
+        ...(isBike && { operator }),
         problem,
         ...(spot.picked && { street: spot.street }),
       })
@@ -174,18 +192,18 @@ export function TagForm({
     setResults(done)
     setSending(false)
     setSaved(true)
-    announce(addedMessage(bikes.length))
-    if (photo)
+    announce(addedMessage(category, bikes.length))
+    if (upload)
       await attach(
         bikes.map(({ id }) => id),
-        photo,
+        upload,
       )
   }
 
   const choosePhoto = (photo?: Blob) => {
     onDraft({ ...draft, photo })
     // A first photo, with every question answered, adds the bikes; changing one only changes it.
-    if (photo && !draft.photo && ready && !failure) void save(photo)
+    if (photo && !draft.photo && ready && !failure && isPublic) void save(photo)
   }
 
   /** Takes every bike of the batch off the map again; the ones already gone count as done. */
@@ -207,7 +225,12 @@ export function TagForm({
   if (saved) {
     const uploading = photoStatus === 'sending'
     return (
-      <Dialog key="saved" title={several ? 'Bikes added' : 'Bike added'} showCancel={false} onCancel={onClose}>
+      <Dialog
+        key="saved"
+        title={isBike ? (several ? 'Bikes added' : 'Bike added') : 'Issue logged'}
+        showCancel={false}
+        onCancel={onClose}
+      >
         <div className="flex flex-col gap-3">
           <div role="status">
             {uploading && <p>Uploading your photo…</p>}
@@ -229,9 +252,12 @@ export function TagForm({
           )}
           {bikes.map((bike, index) => {
             const tag = results[bike.id]
-            const email = tag && operatorEmail(tag, location.origin)
+            const email = tag && operatorEmail(tag, location.origin, draft.registration)
             if (!tag || !email) return null
-            const label = `Email ${OPERATORS[tag.operator].label}${several ? ` (bike ${index + 1})` : ''}`
+            if (!isPublic) return <EmailWithPhoto key={bike.id} email={email} photo={draft.photo} />
+            const label = isBike
+              ? `Email ${OPERATORS[tag.operator].label}${several ? ` (bike ${index + 1})` : ''}`
+              : 'Email the council'
             return uploading ? (
               <button key={bike.id} type="button" disabled className={`${PRIMARY} opacity-50`}>
                 {label}
@@ -242,7 +268,11 @@ export function TagForm({
               </a>
             )
           })}
-          <p className="text-sm text-muted">Email opens your own email app. This site sends nothing.</p>
+          <p className="text-sm text-muted">
+            {isPublic
+              ? 'Email opens your own email app. This site sends nothing.'
+              : 'Your photo and number plate go only in your own email. This site does not receive them.'}
+          </p>
           <button type="button" className={SECONDARY} onClick={onClose}>
             Home
           </button>
@@ -252,7 +282,7 @@ export function TagForm({
             disabled={uploading || undo.sending}
             onClick={undoAll}
           >
-            {several ? 'Undo: remove these bikes' : 'Undo: remove this bike'}
+            {isBike ? (several ? 'Undo: remove these bikes' : 'Undo: remove this bike') : 'Undo: remove this'}
           </button>
           {undo.error && <ErrorText>{undo.error}</ErrorText>}
         </div>
@@ -262,8 +292,9 @@ export function TagForm({
 
   const addLabel = several ? `Add ${bikes.length} bikes to the map` : 'Add to the map'
   const photoStep = ready || !!draft.photo
+  const problemChoicesHere = problemChoices(category)
   return (
-    <Dialog title="Tag a dumped bike" onCancel={onClose} busy={sending}>
+    <Dialog title={config.add} onCancel={onClose} busy={sending}>
       {/* Nothing changes while the bikes are sent. */}
       <div inert={sending} className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -278,17 +309,19 @@ export function TagForm({
         {bikes.map((bike, index) => {
           const questions = (
             <>
+              {isBike && (
+                <Chips
+                  legend="Whose bike?"
+                  name={nameOf('operator', index)}
+                  choices={OPERATOR_CHOICES}
+                  value={bike.operator}
+                  onChange={(operator) => update(index, { operator })}
+                />
+              )}
               <Chips
-                legend="Whose bike?"
-                name={nameOf('operator', index)}
-                choices={OPERATOR_CHOICES}
-                value={bike.operator}
-                onChange={(operator) => update(index, { operator })}
-              />
-              <Chips
-                legend="What's wrong?"
+                legend={isBike ? "What's wrong?" : "What's the issue?"}
                 name={nameOf('problem', index)}
-                choices={PROBLEM_CHOICES}
+                choices={problemChoicesHere}
                 value={bike.problem}
                 onChange={(problem) => update(index, { problem })}
               />
@@ -321,22 +354,42 @@ export function TagForm({
         })}
         {photoStep && (
           <>
-            {uploadsPaused ? (
+            {!isPublic && ready && (
+              <label className="flex flex-col gap-1">
+                <span className="font-bold">Number plate (optional)</span>
+                <input
+                  type="text"
+                  value={draft.registration ?? ''}
+                  maxLength={10}
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  spellCheck={false}
+                  onChange={(event) =>
+                    onDraft({ ...draft, registration: event.target.value.toUpperCase().replace(/[^A-Z0-9 ]/g, '') })
+                  }
+                  className="min-h-12 rounded-[10px] border border-edge px-3 uppercase"
+                />
+                <span className="text-sm text-muted">Stays on your phone. Only goes in your email.</span>
+              </label>
+            )}
+            {isPublic && uploadsPaused ? (
               <p>Photos are switched off for now.</p>
             ) : (
               <PhotoInput
                 photo={draft.photo}
                 onPhoto={choosePhoto}
-                onSkip={ready && !draft.photo && !failure ? () => void save() : undefined}
+                isPrivate={!isPublic}
+                onSkip={isPublic && ready && !draft.photo && !failure ? () => void save() : undefined}
               />
             )}
-            {/* With a photo already, or none possible, nothing else adds the bikes. */}
-            {ready && (draft.photo || uploadsPaused) && !failure && (
+            {/* With a photo already, or none possible, nothing else adds the bikes. A private photo never adds them. */}
+            {ready && (draft.photo || uploadsPaused || !isPublic) && !failure && (
               <button type="button" className={PRIMARY} onClick={() => void save(draft.photo)}>
                 {addLabel}
               </button>
             )}
             {ready &&
+              config.several &&
               (bikes.length < MOST_BIKES ? (
                 <button id="add-bike" type="button" className={SECONDARY} onClick={addBike}>
                   Add another bike here
@@ -362,5 +415,61 @@ export function TagForm({
       </div>
       {sending && <p role="status">Adding…</p>}
     </Dialog>
+  )
+}
+
+type Email = NonNullable<ReturnType<typeof operatorEmail>>
+
+/**
+ * The email for a parking issue. The photo stays on the visitor's phone, and a mailto link cannot attach one, so with a
+ * photo the phone's share sheet takes it to the visitor's email app, and the council's address is copied to paste in.
+ * Without a photo, or where the phone can't share one, it is the plain email.
+ */
+function EmailWithPhoto({ email, photo }: { email: Email; photo?: Blob }) {
+  const [shared, setShared] = useState(false)
+  const file = photo && new File([photo], 'photo.jpg', { type: photo.type || 'image/jpeg' })
+  const canShare = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })
+
+  const share = async () => {
+    if (!file) return
+    // Copied first, in the same tap: the share sheet's email app asks for an address the message cannot carry.
+    void navigator.clipboard?.writeText(email.to).catch(() => {})
+    try {
+      await navigator.share({ files: [file], title: email.subject, text: email.message })
+      setShared(true)
+    } catch {
+      // Closed without sharing: nothing to say.
+    }
+  }
+
+  return (
+    <>
+      {canShare ? (
+        <>
+          <button type="button" className={PRIMARY} onClick={share}>
+            Email with photo
+          </button>
+          <p className="text-sm text-muted">
+            Opens your share sheet. The address is copied: paste it into To.{' '}
+            <span className="whitespace-nowrap font-bold">{email.to}</span>
+          </p>
+          {shared && <p role="status">Shared.</p>}
+          <a href={email.href} className={SECONDARY}>
+            Email without photo
+          </a>
+        </>
+      ) : (
+        <>
+          <a href={email.href} className={PRIMARY}>
+            Email the council
+          </a>
+          {photo && (
+            <p className="text-sm text-muted">
+              This phone can&apos;t attach your photo for you: add it from your photos once your email app opens.
+            </p>
+          )}
+        </>
+      )}
+    </>
   )
 }

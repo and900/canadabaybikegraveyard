@@ -2,7 +2,7 @@
 -- checked against the NSW boundary and road data. Times are relative to now(), with 2 to 46 hours left.
 WITH seeded AS (
   INSERT INTO tags (id, lat, lng, suburb, street, operator, problem, created_at, last_confirmed_at, expires_at)
-  SELECT id::uuid, lat, lng, suburb, street, operator, problem::problem,
+  SELECT id::uuid, lat, lng, suburb, street, operator, problem,
          now() - (48 - hours_left) * interval '1 hour',
          now() - (48 - hours_left) * interval '1 hour',
          now() + hours_left * interval '1 hour'

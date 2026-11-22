@@ -1,5 +1,5 @@
 'use client'
-import { nearbyTags, type PublicTag, type TagJson } from '@iwb/shared'
+import { type Category, nearbyTags, type PublicTag, type TagJson } from '@iwb/shared'
 import { useState } from 'react'
 import { MatchDialog } from './MatchDialog'
 import type { Spot } from './Placement'
@@ -10,6 +10,7 @@ import { type Draft, TagForm } from './TagForm'
  * mounted from the start of tagging to the end, so the answers, the photo and the tags' ids outlive Change location.
  */
 export function TagFlow({
+  category,
   spot,
   tags,
   now,
@@ -18,6 +19,7 @@ export function TagFlow({
   onChangeLocation,
   onClose,
 }: {
+  category: Category
   /** The chosen spot, or undefined while the pin is being placed. */
   spot?: Spot
   tags: PublicTag[]
@@ -39,6 +41,7 @@ export function TagFlow({
     <MatchDialog tags={nearby} now={now} apply={apply} onNo={() => setAnother(spot)} onClose={onClose} />
   ) : (
     <TagForm
+      category={category}
       spot={spot}
       draft={draft}
       onDraft={setDraft}

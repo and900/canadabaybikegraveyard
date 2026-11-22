@@ -1,4 +1,4 @@
-import { bikes, byPlace, type PublicTag } from '@iwb/shared'
+import { byPlace, categoryCount, type Category, type PublicTag } from '@iwb/shared'
 import { TagActions } from './TagActions'
 import { TagRow } from './TagRow'
 
@@ -6,7 +6,15 @@ import { TagRow } from './TagRow'
  * Live tags grouped by suburb: suburbs, then the streets in each, in alphabetical order. `onSelect` as on TagRow.
  * Without it, this is /list, where each row has Still there (§10.3); on the map they are on the card.
  */
-export function TagList({ tags, onSelect }: { tags: PublicTag[]; onSelect?: (tag: PublicTag) => void }) {
+export function TagList({
+  tags,
+  category,
+  onSelect,
+}: {
+  tags: PublicTag[]
+  category: Category
+  onSelect?: (tag: PublicTag) => void
+}) {
   const bySuburb = new Map<string, PublicTag[]>()
   for (const tag of tags.toSorted(byPlace)) {
     const group = bySuburb.get(tag.suburb)
@@ -18,7 +26,10 @@ export function TagList({ tags, onSelect }: { tags: PublicTag[]; onSelect?: (tag
     <div className="flex flex-col gap-2">
       {[...bySuburb].map(([suburb, group]) => (
         <section key={suburb} className="flex flex-col gap-2">
-          <h2 aria-label={`${suburb}, ${bikes(group.length)}`} className="mt-2 text-sm font-bold text-muted">
+          <h2
+            aria-label={`${suburb}, ${categoryCount(category, group.length)}`}
+            className="mt-2 text-sm font-bold text-muted"
+          >
             {suburb} · {group.length}
           </h2>
           {/* On /list, wider gaps keep each row's buttons with its row. */}

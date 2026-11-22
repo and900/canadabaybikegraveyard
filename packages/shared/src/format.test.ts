@@ -103,6 +103,7 @@ describe('pinLabel', () => {
       lng: 151.177079,
       suburb: 'Newtown',
       street: 'Denison St',
+      category: 'bikes',
       operator: 'lime',
       problem: 'blocking_footpath',
       lastConfirmedAt: new Date('2026-11-08T13:40:00Z'),
@@ -123,6 +124,7 @@ describe('parseTag', () => {
       lng: 151.171932,
       suburb: 'Marrickville',
       street: 'Llewellyn St',
+      category: 'bikes',
       operator: 'lime',
       problem: 'blocking_footpath',
       lastConfirmedAt: new Date('2026-11-09T01:00:00Z'),
@@ -135,13 +137,13 @@ describe('parseTag', () => {
 
 describe('photoAlt', () => {
   it("describes a tag's photo by the bike and its problem", () => {
-    expect(photoAlt({ operator: 'lime', problem: 'blocking_footpath' })).toBe(
+    expect(photoAlt({ category: 'bikes', operator: 'lime', problem: 'blocking_footpath' })).toBe(
       'Photo of a Lime e-bike reported as blocking footpath',
     )
-    expect(photoAlt({ operator: 'ario', problem: 'knocked_over' })).toBe(
+    expect(photoAlt({ category: 'bikes', operator: 'ario', problem: 'knocked_over' })).toBe(
       'Photo of an Ario e-bike reported as knocked over',
     )
-    expect(photoAlt({ operator: 'not_sure', problem: 'in_waterway' })).toBe(
+    expect(photoAlt({ category: 'bikes', operator: 'not_sure', problem: 'in_waterway' })).toBe(
       'Photo of a share e-bike reported as in waterway',
     )
   })

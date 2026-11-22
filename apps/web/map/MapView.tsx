@@ -1,6 +1,16 @@
 'use client'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { byPlace, CROWDED_PIN_PX, DIALOG_TOP_REM, pinLabel, PLACEMENT_ZOOM, stacks, type PublicTag } from '@iwb/shared'
+import {
+  byPlace,
+  CROWDED_PIN_PX,
+  DIALOG_TOP_REM,
+  pinLabel,
+  PLACEMENT_ZOOM,
+  type PinKey,
+  pinOf,
+  stacks,
+  type PublicTag,
+} from '@iwb/shared'
 import council from '@iwb/shared/data/council.json'
 import maplibregl, { type LngLatBoundsLike, type MapMouseEvent } from 'maplibre-gl'
 import { Protocol } from 'pmtiles'
@@ -60,6 +70,8 @@ type Props = {
   onStatus: (status: 'ready' | 'failed') => void
   /** The new tag's pin, with the middle of its base on this spot. */
   spot?: { lat: number; lng: number }
+  /** The pin the new tag's spot is drawn with: a bike's until its operator is chosen, otherwise its category's. */
+  spotPin?: PinKey
   /** Use my location's position: the map centres there, at street level (§4.1). */
   centre?: { lat: number; lng: number }
   /** Placing (§10.3): a tap, or the crosshair's arrow keys, put the pin here. */
@@ -69,7 +81,18 @@ type Props = {
 }
 
 /** The one map (§11.3). MapScreen loads this module with import() after first paint, so no other page carries it. */
-export function MapView({ tags, now, selected, onPick, onStatus, spot, centre, onPlace, onUse }: Props) {
+export function MapView({
+  tags,
+  now,
+  selected,
+  onPick,
+  onStatus,
+  spot,
+  spotPin = 'not_sure',
+  centre,
+  onPlace,
+  onUse,
+}: Props) {
   const container = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<maplibregl.Map>()
   const [drawn, setDrawn] = useState(false)
@@ -226,7 +249,7 @@ export function MapView({ tags, now, selected, onPick, onStatus, spot, centre, o
       {/* overflow: clip, not MapLibre's hidden, so focusing a pin off the edge can't scroll the map out of place. */}
       <div ref={container} className="h-full w-full" style={{ overflow: 'clip' }} />
       {map && tags && <Pins map={map} tags={tags} now={now} selected={selected} placing={placing} onPick={onPick} />}
-      {map && spot && <SpotPin map={map} spot={spot} />}
+      {map && spot && <SpotPin map={map} spot={spot} pin={spotPin} />}
       {map && <MapControls map={map} />}
       {placing && (
         <>
@@ -255,7 +278,7 @@ export function MapView({ tags, now, selected, onPick, onStatus, spot, centre, o
 }
 
 /** The new tag's pin. Taps go through it to the map, so tapping beside it moves it. */
-function SpotPin({ map, spot }: { map: maplibregl.Map; spot: { lat: number; lng: number } }) {
+function SpotPin({ map, spot, pin }: { map: maplibregl.Map; spot: { lat: number; lng: number }; pin: PinKey }) {
   const [element] = useState(() => {
     const div = document.createElement('div')
     // A flex box, so the pin's bottom edge is the box's: the middle of its base sits on the spot.
@@ -271,7 +294,7 @@ function SpotPin({ map, spot }: { map: maplibregl.Map; spot: { lat: number; lng:
     return () => void marker.remove()
   }, [map, element, spot.lng, spot.lat])
 
-  return createPortal(<PinIcon operator="not_sure" />, element)
+  return createPortal(<PinIcon pin={pin} />, element)
 }
 
 function Pins({
@@ -390,7 +413,7 @@ function Pin({
         // Focusing a pin off the edge of the map, as Tab does, brings it into view (§4.1).
         onFocus={() => !isInView(map, tag.lng, tag.lat) && map.panTo([tag.lng, tag.lat])}
       >
-        <PinIcon operator={tag.operator} />
+        <PinIcon pin={pinOf(tag)} />
       </button>
       {/* Decorative, and beside the button so its name stays the tag's alone: each pin is still its own button. */}
       {stack && (

@@ -1,5 +1,6 @@
 // Names, counts and times as the site writes them. Times are always Sydney's, whatever the device's time zone.
-import { OPERATORS, type Operator, PROBLEMS } from './config'
+import { CATEGORIES, type Category, OPERATORS, type Operator, PROBLEMS } from './config'
+import type { PinKey } from './palette'
 import type { PublicTag } from './schemas'
 
 const MINUTE = 60_000
@@ -20,8 +21,35 @@ const full = new Intl.DateTimeFormat('en-AU', {
 export const bikeName = (operator: Operator) =>
   operator === 'not_sure' ? 'Share e-bike' : `${OPERATORS[operator].label} e-bike`
 
+/** What a tag is called: "Lime e-bike" for a bike, otherwise its category's noun, "Parking issue". */
+export const tagName = (tag: Pick<PublicTag, 'category' | 'operator'>) =>
+  tag.category === 'bikes' ? bikeName(tag.operator) : CATEGORIES[tag.category].noun
+
+/** How a tag's pin is drawn: by its operator for a bike, otherwise by its category. */
+export const pinOf = (tag: Pick<PublicTag, 'category' | 'operator'>): PinKey =>
+  tag.category === 'bikes' ? (tag.operator as Exclude<Operator, 'council'>) : tag.category
+
 /** "1 bike" or "14 bikes". */
 export const bikes = (n: number) => `${n} ${n === 1 ? 'bike' : 'bikes'}`
+
+/** "1 parking issue", "14 bikes": a count of one category's tags. */
+const NAMES: Record<Category, string> = {
+  bikes: 'bike',
+  parking: 'parking issue',
+  graffiti: 'graffiti or vandalism issue',
+  damage: 'footpath or road issue',
+}
+export const categoryCount = (category: Category, n: number) => `${n} ${NAMES[category]}${n === 1 ? '' : 's'}`
+
+/** The heading over a category's tags: "14 bikes in the graveyard", "3 parking issues logged", or none. */
+export const categoryHeading = (category: Category, n: number) =>
+  category === 'bikes'
+    ? n
+      ? bikeCount(n)
+      : 'No bikes in the graveyard right now.'
+    : n
+      ? `${categoryCount(category, n)} logged`
+      : `No ${NAMES[category]}s right now.`
 
 /** "14 bikes in the graveyard". */
 export const bikeCount = (n: number) => `${bikes(n)} in the graveyard`
@@ -59,14 +87,17 @@ export const byPlace = (a: Pick<PublicTag, 'suburb' | 'street'>, b: Pick<PublicT
 
 /** A pin's accessible name: "Lime e-bike, blocking footpath, Denison St, Newtown, disappears in 31 hours, at …". */
 export const pinLabel = (tag: PublicTag, now: Date) =>
-  `${bikeName(tag.operator)}, ${PROBLEMS[tag.problem].toLowerCase()}, ${tag.street}, ${tag.suburb}, ` +
+  `${tagName(tag)}, ${PROBLEMS[tag.problem].toLowerCase()}, ${tag.street}, ${tag.suburb}, ` +
   `disappears in ${duration(now, tag.expiresAt, true)}, at ${clockTime(tag.expiresAt)}`
 
 /** "a Lime e-bike", or "an Ario e-bike". */
 export const withArticle = (noun: string) => `${/^[aeiou]/i.test(noun) ? 'an' : 'a'} ${noun}`
 
 /** A photo's text alternative, from its tag's fields (§10.4): "Photo of a Lime e-bike reported as blocking footpath". */
-export function photoAlt(tag: Pick<PublicTag, 'operator' | 'problem'>) {
-  const bike = tag.operator === 'not_sure' ? 'share e-bike' : bikeName(tag.operator)
-  return `Photo of ${withArticle(bike)} reported as ${PROBLEMS[tag.problem].toLowerCase()}`
+export function photoAlt(tag: Pick<PublicTag, 'category' | 'operator' | 'problem'>) {
+  const what =
+    tag.category === 'bikes'
+      ? withArticle(tag.operator === 'not_sure' ? 'share e-bike' : bikeName(tag.operator))
+      : tagName(tag).toLowerCase()
+  return `Photo of ${what} reported as ${PROBLEMS[tag.problem].toLowerCase()}`
 }

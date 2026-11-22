@@ -1,5 +1,5 @@
 'use client'
-import { bikeName, bikes, type PublicTag, type TagJson } from '@iwb/shared'
+import { bikes, pinOf, tagName, type PublicTag, type TagJson } from '@iwb/shared'
 import { useState } from 'react'
 import { SECONDARY } from './buttons'
 import { Dialog } from './Dialog'
@@ -42,8 +42,8 @@ export function MatchDialog({
         {tags.map((tag) => (
           <li key={tag.id} className="flex flex-col gap-3 rounded-[10px] border border-line p-3">
             <h3 id={`match-${tag.id}`} className="flex items-center gap-2 font-bold">
-              <PinIcon operator={tag.operator} />
-              {bikeName(tag.operator)}
+              <PinIcon pin={pinOf(tag)} />
+              {tagName(tag)}
             </h3>
             <TagDetails tag={tag} now={now} />
             <button type="button" aria-describedby={`match-${tag.id}`} className={SECONDARY} onClick={() => yes(tag)}>

@@ -1,5 +1,5 @@
 'use client'
-import type { PublicTag } from '@iwb/shared'
+import type { Category, PublicTag } from '@iwb/shared'
 import { useRouter } from 'next/navigation'
 import { lazy, Suspense, useState } from 'react'
 import { flushSync } from 'react-dom'
@@ -13,7 +13,17 @@ const TagFlow = lazy(() => import('./TagFlow').then((module) => ({ default: modu
  * Tagging on /list (§10.3): Use my location and Choose by street, as on the map screen but without the map, then the
  * usual dialogs. The page never loads MapLibre. A new tag shows once the page refreshes from the server.
  */
-export function ListTagButton({ tags, now, uploadsPaused }: { tags: PublicTag[]; now: Date; uploadsPaused: boolean }) {
+export function ListTagButton({
+  category,
+  tags,
+  now,
+  uploadsPaused,
+}: {
+  category: Category
+  tags: PublicTag[]
+  now: Date
+  uploadsPaused: boolean
+}) {
   const router = useRouter()
   const [tagging, setTagging] = useState<'place' | 'describe'>()
   const [spot, setSpot] = useState<Spot>()
@@ -42,9 +52,10 @@ export function ListTagButton({ tags, now, uploadsPaused }: { tags: PublicTag[];
   return (
     <div className="basis-full">
       {/* Tagging needs JavaScript; without it the buttons would do nothing, so they make way for a line saying so. */}
-      <p className="hidden noscript:block">Turn on JavaScript to tag a bike.</p>
+      <p className="hidden noscript:block">Turn on JavaScript to add to the list.</p>
       <div className="noscript:hidden">
         <Placement
+          category={category}
           spot={spot}
           note={note}
           withMap={false}
@@ -64,6 +75,7 @@ export function ListTagButton({ tags, now, uploadsPaused }: { tags: PublicTag[];
       {tagging && (
         <Suspense>
           <TagFlow
+            category={category}
             spot={tagging === 'describe' ? spot : undefined}
             tags={tags}
             now={now}

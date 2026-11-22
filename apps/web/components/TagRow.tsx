@@ -1,4 +1,4 @@
-import { OPERATORS, PROBLEMS, type PublicTag } from '@iwb/shared'
+import { OPERATORS, pinOf, PROBLEMS, type PublicTag } from '@iwb/shared'
 import Link from 'next/link'
 import { FOCUS_RING_ON_HOVER } from './buttons'
 import { PinIcon } from './PinIcon'
@@ -17,11 +17,12 @@ export function TagRow({ tag, onSelect }: { tag: PublicTag; onSelect?: (tag: Pub
       }
       className={`flex min-h-14 items-center gap-3 rounded-[10px] border border-line px-3 py-2 ${FOCUS_RING_ON_HOVER}`}
     >
-      <PinIcon operator={tag.operator} />
+      <PinIcon pin={pinOf(tag)} />
       <span className="flex min-w-0 flex-1 flex-col leading-snug">
         <b>{tag.street}</b>
         <span className="text-sm text-muted">
-          {OPERATORS[tag.operator].label} · {PROBLEMS[tag.problem]}
+          {tag.category === 'bikes' ? `${OPERATORS[tag.operator].label} · ` : ''}
+          {PROBLEMS[tag.problem]}
         </span>
       </span>
     </Link>

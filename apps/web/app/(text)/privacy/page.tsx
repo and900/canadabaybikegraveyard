@@ -1,4 +1,4 @@
-import { COUNTER_RETENTION_HOURS, FEEDBACK_EMAIL, HASH_RETENTION_DAYS, TAG_LIFETIME_HOURS } from '@iwb/shared'
+import { COUNTER_RETENTION_HOURS, FEEDBACK_EMAIL, HASH_RETENTION_DAYS, lifetimeText } from '@iwb/shared'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Privacy' }
@@ -20,15 +20,21 @@ export default function PrivacyPage() {
       <h2>What the app keeps</h2>
       <ul>
         <li>
-          <strong>Tags:</strong> the spot, whose bike it is and what is wrong. There is no free text. A tag is public
-          for up to {TAG_LIFETIME_HOURS} hours after the last sighting, less if I take it down. After that it stays in
-          the database as a record of its spot, street, operator, problem and times.
+          <strong>Tags:</strong> the spot, the category, what is wrong and, for a bike, whose it is. There is no free
+          text. A tag is public for up to {lifetimeText('bikes')} (bikes) or {lifetimeText('parking')} (parking,
+          graffiti and damage) after the last sighting, less if I take it down. After that it stays in the database as a
+          record of its spot, street, operator, problem and times.
         </li>
         <li>
           <strong>Photos:</strong> public while their tag is. A photo&apos;s first report hides it until I restore or
           delete it. Each one is re-encoded when it arrives, which removes its location and other hidden details, and
-          deleted when its tag&apos;s {TAG_LIFETIME_HOURS} hours run out, or sooner if I delete it. Please leave out
-          people, faces and number plates.
+          deleted when its tag&apos;s time runs out, or sooner if I delete it. Please leave out people, faces and number
+          plates.
+        </li>
+        <li>
+          <strong>Parking:</strong> a parking photo and an optional number plate never leave your phone for this site.
+          They are not uploaded or stored, and are never shown. They go only in the email you choose to send to the
+          council.
         </li>
         <li>
           <strong>Reports:</strong> which photo, the reason you chose, and when. I keep that record, and what I decided.

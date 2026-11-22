@@ -1,9 +1,9 @@
-import { clockTime, duration, photoAlt, PROBLEMS, TAG_LIFETIME_HOURS, type PublicTag } from '@iwb/shared'
+import { clockTime, duration, photoAlt, lifetimeHours, PROBLEMS, type PublicTag } from '@iwb/shared'
 import { TagPhoto } from './TagPhoto'
 
 /** Its photo, what is wrong, where, and how long the tag has left. The page or card gives it a heading. */
 export function TagDetails({ tag, now }: { tag: PublicTag; now: Date }) {
-  const left = (tag.expiresAt.getTime() - now.getTime()) / (TAG_LIFETIME_HOURS * 3_600_000)
+  const left = (tag.expiresAt.getTime() - now.getTime()) / (lifetimeHours(tag.category) * 3_600_000)
 
   return (
     <div className="flex flex-col gap-3">

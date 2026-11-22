@@ -1,10 +1,12 @@
 'use client'
-import { bikeCount, bikes, GREYS, type PublicTag, TAG_LIFETIME_HOURS } from '@iwb/shared'
+import { categoryCount, categoryHeading, GREYS, lifetimeText, type PublicTag } from '@iwb/shared'
 import Link from 'next/link'
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
+import { useCategory } from '@/lib/use-category'
 import { useLiveTags } from '@/lib/use-live-tags'
 import { announce } from './Announcer'
+import { CategoryButtons } from './CategoryButtons'
 import { CrowdChooser } from './CrowdChooser'
 import { Legend } from './Legend'
 import { type Located, unlessFinding, useReading } from './LocateButton'
@@ -31,7 +33,10 @@ const READY_WITHIN_MS = 15_000
 export function MapScreen() {
   const [status, setStatus] = useState<Status>('loading')
   const [MapView, setMapView] = useState<MapModule['MapView']>()
-  const { tags, now, apply, uploadsPaused } = useLiveTags()
+  const { tags: allTags, now, apply, uploadsPaused } = useLiveTags()
+  const [category, setCategory] = useCategory()
+  // The map, the list and the key show the chosen category; the others stay out of the way until it is changed.
+  const tags = allTags?.filter((tag) => tag.category === category)
   const [selected, setSelected] = useState<string>()
   const [crowd, setCrowd] = useState<string[]>()
   // The pin that opened the chooser, which gets focus back when it closes.
@@ -197,7 +202,7 @@ export function MapScreen() {
           Skip to the list
         </a>
         <p id="map-summary" className="sr-only">
-          Map of Canada Bay{tags && ` with ${bikes(tags.length)} tagged`}. A list view is available.
+          Map of Canada Bay{tags && ` with ${categoryCount(category, tags.length)} logged`}. A list view is available.
         </p>
         {MapView && status !== 'failed' && (
           <MapView
@@ -213,6 +218,7 @@ export function MapScreen() {
             }}
             onStatus={setStatus}
             spot={spot}
+            spotPin={category === 'bikes' ? 'not_sure' : category}
             centre={centre}
             onPlace={tagging === 'place' ? place : undefined}
             onUse={() => {
@@ -268,6 +274,7 @@ export function MapScreen() {
         ) : tagging ? (
           <>
             <Placement
+              category={category}
               spot={spot}
               note={note}
               reading={reading}
@@ -280,6 +287,7 @@ export function MapScreen() {
             <Suspense>
               <TagFlow
                 spot={tagging === 'describe' ? spot : undefined}
+                category={category}
                 tags={tags ?? []}
                 now={now}
                 uploadsPaused={uploadsPaused}
@@ -294,20 +302,29 @@ export function MapScreen() {
             {/* Each line keeps its height while the tags load, so nothing moves when they arrive. */}
             <div>
               <h2 ref={count} tabIndex={-1} className="min-h-7 text-lg font-bold">
-                {tags && (tags.length ? bikeCount(tags.length) : 'No bikes in the graveyard right now.')}
+                {tags && categoryHeading(category, tags.length)}
               </h2>
-              <p className="text-sm text-muted">Tags disappear {TAG_LIFETIME_HOURS} hours after the last sighting.</p>
+              <p className="text-sm text-muted">Disappears {lifetimeText(category)} after the last sighting.</p>
             </div>
-            <Legend tags={tags} />
-            {/* Where tagging starts: Use my location and Choose by street (§3). */}
-            <Placement note={note} reading={reading} onLocate={locate} onResult={located} onChoose={choose} />
+            <Legend tags={tags} category={category} />
+            {/* The four categories choose what the map and list show, and what is added. */}
+            <CategoryButtons current={category} onChange={setCategory} />
+            {/* Where adding starts: Use my location and Choose by street (§3). */}
+            <Placement
+              category={category}
+              note={note}
+              reading={reading}
+              onLocate={locate}
+              onResult={located}
+              onChoose={choose}
+            />
             {/* The panel has room for the list itself, so it needs no List toggle (§13). */}
             <div className="wide:hidden">
-              <ViewToggle current="/" />
+              <ViewToggle current="/" category={category} />
             </div>
             {tags && (
               <div className="hidden wide:block">
-                <TagList tags={tags} onSelect={select} />
+                <TagList tags={tags} category={category} onSelect={select} />
               </div>
             )}
           </>

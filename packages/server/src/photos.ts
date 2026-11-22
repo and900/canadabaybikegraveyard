@@ -4,7 +4,7 @@
 // deleting a photo locks its row first, as a report does, then closes its open reports in the same statement as the
 // change, so this file needs nothing from reports.ts.
 import { randomUUID } from 'node:crypto'
-import { AppError, type PauseReason } from '@iwb/shared'
+import { AppError, type PauseReason, publicPhotos } from '@iwb/shared'
 import { deleteFiles, getFile, listFiles, putFile } from './blob'
 import { db } from './client'
 import { Prisma } from './generated/prisma/client'
@@ -80,6 +80,10 @@ export async function attachPhoto({
   visitor: Visitor
   makePhoto: () => Promise<NewPhoto>
 }) {
+  // A private category's photo (parking) never reaches the site: it goes only in the visitor's own email.
+  const [{ category } = { category: undefined }] = await db.$queryRaw<{ category: string }[]>`
+    SELECT category FROM tags WHERE id = ${tagId}::uuid`
+  if (category && !publicPhotos(category)) throw new AppError('invalid')
   if (await hasPhoto(tagId, visitor)) return { tag: await getLiveTag(tagId) }
   await checkLimits('photo', visitor)
   const photo = await makePhoto()

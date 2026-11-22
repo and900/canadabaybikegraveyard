@@ -18,10 +18,13 @@ export function PhotoInput({
   photo,
   onPhoto,
   onSkip,
+  isPrivate,
 }: {
   photo?: Blob
   onPhoto: (photo?: Blob) => void
   onSkip?: () => void
+  /** The photo stays on the visitor's phone and goes only in their own email: it is never uploaded. */
+  isPrivate?: boolean
 }) {
   const [error, setError] = useState<string>()
   const input = useRef<HTMLInputElement>(null)
@@ -79,7 +82,11 @@ export function PhotoInput({
         )}
       </div>
       <div className="text-sm text-muted">
-        <p>Photos are public. Leave out people, faces and number plates.</p>
+        {isPrivate ? (
+          <p>This photo stays on your phone. It is not uploaded to this site and is never shown here.</p>
+        ) : (
+          <p>Photos are public. Leave out people, faces and number plates.</p>
+        )}
         {/* A new tab, so the form keeps what is filled in. */}
         <a href="/terms" target="_blank" className="inline-flex min-h-11 items-center underline underline-offset-2">
           Read the terms<span className="sr-only"> (opens in a new tab)</span>

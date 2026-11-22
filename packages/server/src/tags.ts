@@ -5,9 +5,10 @@ import {
   type AdminTag,
   type AdminTagEvent,
   AppError,
+  DEFAULT_CATEGORY,
+  lifetimeHours,
   type NewTag,
   type PublicTag,
-  TAG_LIFETIME_HOURS,
 } from '@iwb/shared'
 import { isStreetNear, where } from '@iwb/shared/geo'
 import { db } from './client'
@@ -21,11 +22,11 @@ export const LIVE = Prisma.sql`status = 'active' AND expires_at > now()`
 export const taggedBy = (visitor: Visitor) => Prisma.sql`
   EXISTS (SELECT 1 FROM tag_events
           WHERE tag_id = tags.id AND type = 'created' AND visitor_hash = ${visitor.visitorHash})`
-/** A new tag's time, and a sighting's: 48 hours from now, never added on top (§4.2). */
-const LIFETIME = Prisma.sql`now() + ${TAG_LIFETIME_HOURS} * interval '1 hour'`
+/** A new tag's time, and a sighting's: its category's lifetime from now, never added on top (§4.2). */
+const lifetimeFrom = (category: string) => Prisma.sql`now() + ${lifetimeHours(category)}::int * interval '1 hour'`
 
 const FIELDS = Prisma.sql`
-  id, lat::float8 AS lat, lng::float8 AS lng, suburb, street, operator, problem,
+  id, lat::float8 AS lat, lng::float8 AS lng, suburb, street, category, operator, problem,
   last_confirmed_at AS "lastConfirmedAt", expires_at AS "expiresAt"`
 const PUBLIC_FIELDS = Prisma.sql`
   ${FIELDS}, (SELECT id FROM photos WHERE tag_id = tags.id AND status = 'visible') AS "photoId"`
@@ -109,13 +110,16 @@ export async function createTag({ tag, visitor }: { tag: NewTag; visitor: Visito
   const { inside, suburb, street: nearest } = where(tag.lat, tag.lng)
   if (!inside) throw new AppError('outside_area')
   const street = tag.street && isStreetNear(tag.street, tag.lat, tag.lng) ? tag.street : nearest
+  // The schema has checked that the fields fit the category: a bike names its operator, anything else is the council's.
+  const category = tag.category ?? DEFAULT_CATEGORY
+  const operator = category === DEFAULT_CATEGORY ? tag.operator : 'council'
   return db.$transaction(async (tx) => {
     // The tag goes in before its created event, which refers to it; the id is the event's request id. A repeat
     // inserts nothing, and the claim then finds the first create.
     await tx.$executeRaw`
-      INSERT INTO tags (id, lat, lng, suburb, street, operator, problem, expires_at)
-      VALUES (${tag.id}::uuid, ${tag.lat}, ${tag.lng}, ${suburb}, ${street}, ${tag.operator}, ${tag.problem}::problem,
-              ${LIFETIME})
+      INSERT INTO tags (id, lat, lng, suburb, street, category, operator, problem, expires_at)
+      VALUES (${tag.id}::uuid, ${tag.lat}, ${tag.lng}, ${suburb}, ${street}, ${category}, ${operator}, ${tag.problem},
+              ${lifetimeFrom(category)})
       ON CONFLICT (id) DO NOTHING`
     if (await claimRequest(tx, { requestId: tag.id, tagId: tag.id, type: 'created', visitor }))
       await countAction(tx, 'create', visitor)
@@ -123,14 +127,16 @@ export async function createTag({ tag, visitor }: { tag: NewTag; visitor: Visito
   })
 }
 
-/** Still there (§4.2): a live tag's 48 hours start again from now. */
+/** Still there (§4.2): a live tag's time, its category's, starts again from now. */
 export function confirmStillThere({ tagId, requestId, visitor }: TagAction) {
   return db.$transaction(async (tx) => {
     if (!(await claimRequest(tx, { requestId, tagId, type: 'still_there', visitor })))
       return { tag: await getLiveTag(tagId, tx) }
     await countAction(tx, 'still_there', visitor, tagId)
+    const [found] = await tx.$queryRaw<{ category: string }[]>`SELECT category FROM tags WHERE id = ${tagId}::uuid`
     const [tag] = await tx.$queryRaw<PublicTag[]>`
-      UPDATE tags SET last_confirmed_at = now(), expires_at = ${LIFETIME}, confirm_count = confirm_count + 1
+      UPDATE tags SET last_confirmed_at = now(), expires_at = ${lifetimeFrom(found?.category ?? DEFAULT_CATEGORY)},
+                      confirm_count = confirm_count + 1
       WHERE id = ${tagId}::uuid AND ${LIVE} RETURNING ${PUBLIC_FIELDS}`
     // Rolling back takes the event and the counts back too.
     if (!tag) throw new AppError('tag_gone')

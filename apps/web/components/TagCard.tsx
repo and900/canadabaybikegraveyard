@@ -1,5 +1,5 @@
 'use client'
-import { bikeName, PROBLEMS, type PublicTag, type TagJson } from '@iwb/shared'
+import { PROBLEMS, pinOf, tagName, type PublicTag, type TagJson } from '@iwb/shared'
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { SMALL } from './buttons'
 import { PinIcon } from './PinIcon'
@@ -68,10 +68,10 @@ export function TagCard({
       </button>
       <div className="flex items-start justify-between gap-3">
         <h2 id="card-heading" ref={heading} tabIndex={-1} className="flex min-w-0 items-center gap-2 text-lg font-bold">
-          <PinIcon operator={tag.operator} />
+          <PinIcon pin={pinOf(tag)} />
           {/* Only the shrunk card's one line is cut short; expanded, a long name wraps (1.4.4). */}
           <span className={shrunk ? 'truncate' : ''}>
-            {bikeName(tag.operator)}
+            {tagName(tag)}
             {shrunk && (
               <span className="wide:hidden">
                 {' '}

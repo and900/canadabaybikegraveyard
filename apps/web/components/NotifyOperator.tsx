@@ -15,6 +15,7 @@ export function NotifyOperator({ tag, origin }: { tag: PublicTag; origin: string
   const [clicked, setClicked] = useState(false)
   const email = operatorEmail(tag, origin)
   if (!email) return null
+  const ask = tag.category === 'bikes' ? 'Notify the service provider?' : 'Notify the council?'
 
   const opening = () => {
     setClicked(true)
@@ -24,11 +25,13 @@ export function NotifyOperator({ tag, origin }: { tag: PublicTag; origin: string
   return (
     <>
       <p className="pt-2 text-sm text-muted">
-        Tagging a bike does not tell the bike company. To tell them yourself, use &ldquo;Notify the service
-        provider?&rdquo; below.
+        {tag.category === 'bikes'
+          ? 'Tagging a bike does not tell the bike company.'
+          : 'Logging this does not tell the council.'}{' '}
+        To tell them yourself, use &ldquo;{ask}&rdquo; below.
       </p>
       <details>
-        <summary className="cursor-pointer py-2.5 font-bold">Notify the service provider?</summary>
+        <summary className="cursor-pointer py-2.5 font-bold">{ask}</summary>
         <div className="flex flex-col gap-2 pt-1">
           <a href={email.href} className={SECONDARY} onClick={opening}>
             Email {OPERATORS[tag.operator].label}

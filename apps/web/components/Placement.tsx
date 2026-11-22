@@ -1,4 +1,5 @@
 'use client'
+import { CATEGORIES, type Category } from '@iwb/shared'
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { PRIMARY, SECONDARY } from './buttons'
@@ -25,6 +26,7 @@ export const pinOn = (spot: Spot) => `Pin on ${spot.street}, ${spot.suburb}`
  * back to the form with it. Not a dialog: the whole map stays usable beside it.
  */
 export function Placement({
+  category,
   spot,
   note,
   withMap = true,
@@ -35,6 +37,8 @@ export function Placement({
   onKeep,
   onCancel,
 }: {
+  /** What is being added: its name heads the screen. */
+  category: Category
   spot?: Spot
   /** Said in place of the spot: where a location read has got to, or why it placed no pin. */
   note?: string
@@ -59,7 +63,9 @@ export function Placement({
   }, [idle])
   const [choosing, setChoosing] = useState(false)
   const chooseButton = useRef<HTMLButtonElement>(null)
-  const prompt = withMap ? 'Tap the map where the bike is.' : 'Use your location, or choose the street.'
+  const prompt = withMap
+    ? `Tap the map where the ${category === 'bikes' ? 'bike' : 'issue'} is.`
+    : 'Use your location, or choose the street.'
 
   const stopChoosing = () => {
     flushSync(() => setChoosing(false))
@@ -69,7 +75,7 @@ export function Placement({
   return (
     <section aria-labelledby="placement-heading" className="flex flex-col gap-3">
       <h2 id="placement-heading" ref={heading} tabIndex={-1} className="text-lg font-bold">
-        Tag a dumped bike
+        {CATEGORIES[category].add}
       </h2>
       {!idle && <p className="min-h-12">{note ?? (spot ? pinOn(spot) : prompt)}</p>}
       <div className="grid grid-cols-2 gap-2">

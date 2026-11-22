@@ -10,6 +10,7 @@ const tag: PublicTag = {
   lng: 151.171932,
   suburb: 'Marrickville',
   street: 'Llewellyn St',
+  category: 'bikes',
   operator: 'lime',
   problem: 'blocking_footpath',
   lastConfirmedAt: new Date('2026-11-09T00:00:00Z'),

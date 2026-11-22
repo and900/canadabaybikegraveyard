@@ -1,9 +1,9 @@
-import { LIMITS, type NewTag, PROBLEMS, REPORT_REASONS } from '@iwb/shared'
+import { LIMITS, type NewTag, REPORT_REASONS } from '@iwb/shared'
 import { where } from '@iwb/shared/geo'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from './client'
 import { countAction } from './limits'
-import { Problem, ReportReason } from './generated/prisma/enums'
+import { ReportReason } from './generated/prisma/enums'
 import { takeDown } from './moderation'
 import {
   confirmStillThere,
@@ -86,10 +86,6 @@ describe('listRecentTags', () => {
 })
 
 describe('database enums', () => {
-  it('Problem has the keys of PROBLEMS in config.ts', () => {
-    expect(Object.values(Problem)).toEqual(Object.keys(PROBLEMS))
-  })
-
   it('ReportReason has the keys of REPORT_REASONS in config.ts', () => {
     expect(Object.values(ReportReason)).toEqual(Object.keys(REPORT_REASONS))
   })
@@ -121,13 +117,32 @@ const hoursLeft = async (id: string) =>
   )[0].hours
 
 describe('createTag', () => {
-  it('adds a live tag for 48 hours, named from where(), with its created event', async () => {
+  it('adds a live tag for 72 hours, a bike, named from where(), with its created event', async () => {
     const { tag } = await createTag({ tag: BROUGHTON_ST, visitor: alice })
-    expect(tag).toMatchObject({ id: NEW, suburb: 'Drummoyne', street: 'Broughton St', operator: 'hello' })
-    expect(await hoursLeft(NEW)).toBeCloseTo(48, 3)
+    expect(tag).toMatchObject({
+      id: NEW,
+      suburb: 'Drummoyne',
+      street: 'Broughton St',
+      category: 'bikes',
+      operator: 'hello',
+    })
+    expect(await hoursLeft(NEW)).toBeCloseTo(72, 3)
     expect(await db.$queryRaw`SELECT type::text, request_id::text, visitor_hash, ip_hash FROM tag_events`).toEqual([
       { type: 'created', request_id: NEW, visitor_hash: alice.visitorHash, ip_hash: alice.ipHash },
     ])
+  })
+
+  it('adds a report of another category for 7 days, to the council', async () => {
+    const parking: NewTag = {
+      id: NEW,
+      lat: -33.85789,
+      lng: 151.15052,
+      category: 'parking',
+      problem: 'parking_blocking',
+    }
+    const { tag } = await createTag({ tag: parking, visitor: alice })
+    expect(tag).toMatchObject({ id: NEW, category: 'parking', operator: 'council', problem: 'parking_blocking' })
+    expect(await hoursLeft(NEW)).toBeCloseTo(168, 3)
   })
 
   it('refuses a spot outside the council and its 20 m strip, and stores nothing', async () => {
@@ -186,11 +201,11 @@ describe('confirmStillThere', () => {
   const still = (tagId: string, visitor = alice, requestId = crypto.randomUUID()) =>
     confirmStillThere({ tagId, requestId, visitor })
 
-  it('§5.5 expiry: Still there one second before expires_at restarts the 48 hours', async () => {
+  it('§5.5 expiry: Still there one second before expires_at restarts the 72 hours', async () => {
     await insertTag(NEW, 'active', 1)
     const { tag } = await still(NEW)
     expect(tag).toMatchObject({ id: NEW })
-    expect(await hoursLeft(NEW)).toBeCloseTo(48, 3)
+    expect(await hoursLeft(NEW)).toBeCloseTo(72, 3)
     expect(await row(NEW)).toMatchObject({ confirmCount: 1 })
     expect(await events(NEW)).toEqual(['still_there'])
   })
@@ -204,10 +219,17 @@ describe('confirmStillThere', () => {
     expect(await counts()).toEqual([])
   })
 
-  it('restarts the 48 hours from now and never adds time on top', async () => {
-    await insertTag(NEW, 'active', 47 * HOUR)
+  it('restarts the 72 hours from now and never adds time on top', async () => {
+    await insertTag(NEW, 'active', 71 * HOUR)
     await still(NEW)
-    expect(await hoursLeft(NEW)).toBeCloseTo(48, 3)
+    expect(await hoursLeft(NEW)).toBeCloseTo(72, 3)
+  })
+
+  it('restarts the 7 days of a report that is not a bike', async () => {
+    await insertTag(NEW, 'active', HOUR)
+    await db.$executeRaw`UPDATE tags SET category = 'graffiti', operator = 'council', problem = 'graffiti' WHERE id = ${NEW}::uuid`
+    await still(NEW)
+    expect(await hoursLeft(NEW)).toBeCloseTo(168, 3)
   })
 
   it('§5.5 repeats: Still there again with the same request id returns the current state, with one event and one count', async () => {
