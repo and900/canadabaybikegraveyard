@@ -102,8 +102,9 @@ export function TagForm({
   const update = (index: number, answer: Partial<Bike>) => {
     const next = bikes.map((bike, i) => (i === index ? { ...bike, ...answer } : bike))
     onDraft({ ...draft, bikes: next })
-    if (!ready && answered(next) && !draft.photo && (!isPublic || !uploadsPaused))
-      announce(isPublic ? 'Add a photo, or skip it.' : 'Add a photo for your email, or just add it.')
+    // A private category has no photo step to add it: the last answer does, and the photo and number plate come after.
+    if (!isPublic && !ready && answered(next)) void save(undefined, next)
+    else if (!ready && answered(next) && !draft.photo && !uploadsPaused) announce('Add a photo, or skip it.')
   }
 
   /** A new bike, answered as the one above it, since a pile usually shares both answers (§4.2). */
@@ -152,15 +153,15 @@ export function TagForm({
       : "Bike added, but the photo didn't upload."
 
   /** Adds the bikes, then sends the photo, if there is one. */
-  const save = async (photo?: Blob) => {
-    if (sending || !ready) return
+  const save = async (photo?: Blob, list = bikes) => {
+    if (sending || !answered(list)) return
     setSending(true)
     setFailure(undefined)
-    if (several) announce(`Adding ${bikes.length} bikes…`)
+    if (list.length > 1) announce(`Adding ${list.length} bikes…`)
     // A photo kept on the phone is never sent.
     const upload = isPublic ? photo : undefined
     const done = { ...results }
-    for (const { id, operator, problem } of bikes) {
+    for (const { id, operator, problem } of list) {
       // Each is on the map as soon as it is added. The first not answered for is sent again, as its answer may have been
       // lost: the server answers a repeat with the tag as it is and counts nothing (§5.3).
       if (id in done) continue
@@ -192,10 +193,10 @@ export function TagForm({
     setResults(done)
     setSending(false)
     setSaved(true)
-    announce(addedMessage(category, bikes.length))
+    announce(addedMessage(category, list.length))
     if (upload)
       await attach(
-        bikes.map(({ id }) => id),
+        list.map(({ id }) => id),
         upload,
       )
   }
@@ -250,6 +251,27 @@ export function TagForm({
               )}
             </div>
           )}
+          {!isPublic && (
+            <>
+              <label className="flex flex-col gap-1">
+                <span className="font-bold">Number plate (optional)</span>
+                <input
+                  type="text"
+                  value={draft.registration ?? ''}
+                  maxLength={10}
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  spellCheck={false}
+                  onChange={(event) =>
+                    onDraft({ ...draft, registration: event.target.value.toUpperCase().replace(/[^A-Z0-9 ]/g, '') })
+                  }
+                  className="min-h-12 rounded-[10px] border border-edge px-3 uppercase"
+                />
+                <span className="text-sm text-muted">Stays on your phone. Only goes in your email.</span>
+              </label>
+              <PhotoInput photo={draft.photo} onPhoto={(photo) => onDraft({ ...draft, photo })} isPrivate />
+            </>
+          )}
           {bikes.map((bike, index) => {
             const tag = results[bike.id]
             const email = tag && operatorEmail(tag, location.origin, draft.registration)
@@ -291,7 +313,8 @@ export function TagForm({
   }
 
   const addLabel = several ? `Add ${bikes.length} bikes to the map` : 'Add to the map'
-  const photoStep = ready || !!draft.photo
+  // Only a public category has a photo step: a private photo is added after, on the screen that has the email.
+  const photoStep = isPublic && (ready || !!draft.photo)
   const problemChoicesHere = problemChoices(category)
   return (
     <Dialog title={config.add} onCancel={onClose} busy={sending}>
@@ -354,36 +377,17 @@ export function TagForm({
         })}
         {photoStep && (
           <>
-            {!isPublic && ready && (
-              <label className="flex flex-col gap-1">
-                <span className="font-bold">Number plate (optional)</span>
-                <input
-                  type="text"
-                  value={draft.registration ?? ''}
-                  maxLength={10}
-                  autoCapitalize="characters"
-                  autoComplete="off"
-                  spellCheck={false}
-                  onChange={(event) =>
-                    onDraft({ ...draft, registration: event.target.value.toUpperCase().replace(/[^A-Z0-9 ]/g, '') })
-                  }
-                  className="min-h-12 rounded-[10px] border border-edge px-3 uppercase"
-                />
-                <span className="text-sm text-muted">Stays on your phone. Only goes in your email.</span>
-              </label>
-            )}
-            {isPublic && uploadsPaused ? (
+            {uploadsPaused ? (
               <p>Photos are switched off for now.</p>
             ) : (
               <PhotoInput
                 photo={draft.photo}
                 onPhoto={choosePhoto}
-                isPrivate={!isPublic}
-                onSkip={isPublic && ready && !draft.photo && !failure ? () => void save() : undefined}
+                onSkip={ready && !draft.photo && !failure ? () => void save() : undefined}
               />
             )}
             {/* With a photo already, or none possible, nothing else adds the bikes. A private photo never adds them. */}
-            {ready && (draft.photo || uploadsPaused || !isPublic) && !failure && (
+            {ready && (draft.photo || uploadsPaused) && !failure && (
               <button type="button" className={PRIMARY} onClick={() => void save(draft.photo)}>
                 {addLabel}
               </button>
