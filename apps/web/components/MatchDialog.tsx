@@ -61,7 +61,7 @@ export function MatchDialog({
       </ul>
       {error && <ErrorText>{error}</ErrorText>}
       <button type="button" className={SECONDARY} onClick={onNo}>
-        {isBike ? 'No, it&apos;s another bike' : 'No, it&apos;s a different one'}
+        {isBike ? "No, it's another bike" : "No, it's a different one"}
       </button>
     </Dialog>
   )
