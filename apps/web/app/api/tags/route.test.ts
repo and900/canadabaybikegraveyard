@@ -51,6 +51,7 @@ describe('POST /api/tags', () => {
     expect(await response.json()).toEqual({
       tag: {
         ...tag,
+        category: 'bikes',
         suburb: 'Drummoyne',
         street: 'Broughton St',
         lastConfirmedAt: expect.any(String),
