@@ -33,12 +33,16 @@ export function Santa({ name, run }: { name: string; run: boolean }) {
     let last = 0
     let frame = 0
     let layer = 0
+    let turns = 0
+    element.dataset.tow = ''
     const draw = (now: number) => {
       const seconds = Math.min(0.05, (now - last) / 1000 || 0)
       last = now
       const { x, y, vx, vy, turned } = flight.step(seconds)
       element.dataset.layer ||= 'front'
       if (turned) {
+        // The banner and its rope are for the first two passes only.
+        if (++turns === 2) delete element.dataset.tow
         // His first turn ends the crossing in front of everything; then he picks a depth each time he turns.
         element.dataset.layer = LAYERS[layer++ % LAYERS.length]
         if (Math.random() < 0.5) layer++
@@ -57,6 +61,7 @@ export function Santa({ name, run }: { name: string; run: boolean }) {
       cancelAnimationFrame(frame)
       removeEventListener('resize', resize)
       delete element.dataset.layer
+      delete element.dataset.tow
     }
   }, [run])
 
@@ -86,6 +91,7 @@ export function Santa({ name, run }: { name: string; run: boolean }) {
           </div>
         </div>
         <div className="xmas-tow">
+          <i className="xmas-rope" />
           <span>Merry Christmas, {name}!</span>
         </div>
       </div>

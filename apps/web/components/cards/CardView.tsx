@@ -13,20 +13,6 @@ export type CardProps = {
   theme: CardTheme
 }
 
-/** Where the tree's baubles twinkle, as a percentage of its picture. */
-const SPARKS = [
-  [50, 5],
-  [40, 24],
-  [60, 31],
-  [35, 45],
-  [64, 50],
-  [48, 60],
-  [28, 70],
-  [70, 72],
-  [42, 82],
-  [58, 88],
-]
-
 /** A falling snow, drawn on a canvas behind the card. With reduced motion it is drawn once and stays still. */
 function useSnow() {
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -83,8 +69,7 @@ type Stage = 'sealed' | 'turning' | 'flap' | 'folded' | 'open'
 
 /**
  * The card: a closed envelope addressed to the recipient. A tap turns it over, opens its flap, and out comes a folded
- * card with the village scene on its front, which opens to the message. The tree is always lit beside the greeting,
- * and Santa flies round the scene. The first tap tells the site the card was opened.
+ * card with the village scene on its front, which opens to the message. Santa flies round the scene, towing a banner for his first two passes. Tapping the open card starts it all again. The first tap tells the site the card was opened.
  */
 export function CardView({ code, name, greeting, message, signoff, theme }: CardProps) {
   const [stage, setStage] = useState<Stage>('sealed')
@@ -104,6 +89,12 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
     later(1700, 'folded')
     later(3000, 'open')
   }
+  /** Back to the closed envelope, and Santa starts his flight again. */
+  const restart = () => {
+    timers.current.forEach(clearTimeout)
+    timers.current = []
+    setStage('sealed')
+  }
   const envelope = stage === 'sealed' || stage === 'turning' || stage === 'flap'
 
   return (
@@ -118,12 +109,6 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
         ))}
       </div>
       <div className="xmas-head">
-        <div className="xmas-tree" aria-hidden="true">
-          <Image src="/c/tree.webp" alt="" width={420} height={628} />
-          {SPARKS.map(([x, y], i) => (
-            <b key={i} style={{ left: `${x}%`, top: `${y}%`, '--d': `${(i * 0.23) % 1.4}s` } as React.CSSProperties} />
-          ))}
-        </div>
         <h1>Merry Christmas!</h1>
       </div>
 
@@ -153,7 +138,12 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
         )}
 
         {!envelope && (
-          <section className="xmas-card" data-stage={stage} aria-label="Your Christmas card">
+          <section
+            className="xmas-card"
+            data-stage={stage}
+            aria-label="Your Christmas card"
+            onClick={stage === 'open' ? restart : undefined}
+          >
             <div className="xmas-sheet">
               <h2>{name}</h2>
               {greeting && <p className="xmas-hi">{greeting}</p>}

@@ -79,53 +79,13 @@
   transform: scaleX(-1);
 }
 
-/* The tree, always lit, under the garland at the left, with the greeting beside it */
+/* The greeting, under the garland at the left */
 .xmas-head {
   position: absolute;
   top: calc(var(--holly) - 14px);
   left: 14px;
   right: 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
   pointer-events: none;
-}
-.xmas-tree {
-  position: relative;
-  z-index: 2;
-  flex: none;
-  width: clamp(58px, 9vw, 88px);
-}
-.xmas-tree img {
-  display: block;
-  width: 100%;
-  height: auto;
-  filter: brightness(1.12) saturate(1.15) drop-shadow(0 0 12px var(--glow));
-}
-.xmas-tree b {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  margin: -4px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow:
-    0 0 8px 3px var(--glow),
-    0 0 16px 6px #fff8;
-  opacity: 0;
-  animation: xmas-twinkle 1.4s ease-in-out infinite;
-  animation-delay: var(--d);
-}
-@keyframes xmas-twinkle {
-  0%,
-  100% {
-    opacity: 0;
-    transform: scale(0.4);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 .xmas h1,
 .xmas h2 {
@@ -447,12 +407,29 @@
 /* The banner he tows behind him, and golden sparkles */
 .xmas-tow {
   position: absolute;
-  top: 38%;
-  right: 88%;
+  top: 40%;
+  right: 92%;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 1.2s;
+}
+.xmas-santa[data-tow] .xmas-tow {
+  opacity: 1;
 }
 .xmas-santa[data-left] .xmas-tow {
   right: auto;
-  left: 88%;
+  left: 92%;
+  flex-direction: row-reverse;
+}
+/* A golden rope between the sleigh and the banner */
+.xmas-rope {
+  flex: none;
+  width: clamp(50px, 16vw, 90px);
+  height: 3px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, #ffe08a 0 4px, #c8901e 4px 8px);
+  box-shadow: 0 0 8px var(--glow);
 }
 .xmas-tow span {
   display: block;
