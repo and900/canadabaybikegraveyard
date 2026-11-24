@@ -279,6 +279,48 @@
   transform: rotateY(-172deg);
   visibility: hidden;
 }
+.xmas-sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+/* A small tree at the card's top left, always lit, with baubles that twinkle */
+.xmas-tree {
+  position: relative;
+  flex: none;
+  width: 44px;
+}
+.xmas-tree img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: brightness(1.1) saturate(1.15) drop-shadow(0 0 6px var(--glow));
+}
+.xmas-tree b {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 5px 2px var(--glow),
+    0 0 10px 4px #fff8;
+  opacity: 0;
+  animation: xmas-twinkle 1.4s ease-in-out infinite;
+  animation-delay: var(--d);
+}
+@keyframes xmas-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 .xmas-sheet h2 {
   font-size: clamp(1.9rem, 7vw, 2.5rem);
   line-height: 1.05;

@@ -13,6 +13,20 @@ export type CardProps = {
   theme: CardTheme
 }
 
+/** Where the tree's baubles twinkle, as a percentage of its picture. */
+const SPARKS = [
+  [50, 5],
+  [40, 24],
+  [60, 31],
+  [35, 45],
+  [64, 50],
+  [48, 60],
+  [28, 70],
+  [70, 72],
+  [42, 82],
+  [58, 88],
+]
+
 /** A falling snow, drawn on a canvas behind the card. With reduced motion it is drawn once and stays still. */
 function useSnow() {
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -145,7 +159,18 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
             onClick={stage === 'open' ? restart : undefined}
           >
             <div className="xmas-sheet">
-              <h2>{name}</h2>
+              <div className="xmas-sheet-head">
+                <div className="xmas-tree" aria-hidden="true">
+                  <Image src="/c/tree.webp" alt="" width={420} height={628} />
+                  {SPARKS.map(([x, y], i) => (
+                    <b
+                      key={i}
+                      style={{ left: `${x}%`, top: `${y}%`, '--d': `${(i * 0.23) % 1.4}s` } as React.CSSProperties}
+                    />
+                  ))}
+                </div>
+                <h2>{name}</h2>
+              </div>
               {greeting && <p className="xmas-hi">{greeting}</p>}
               <p className="xmas-msg">{message}</p>
               <div className="xmas-from">{signoff}</div>
