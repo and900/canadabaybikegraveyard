@@ -212,6 +212,9 @@
 
 /* Card */
 .xmas-card {
+  position: relative;
+  margin-top: 40px;
+  padding-top: 64px;
   text-align: center;
   animation: xmas-rise 0.9s ease-out;
 }
@@ -378,4 +381,15 @@
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* The holly garland lies across the top edge of the card */
+.xmas-border {
+  position: absolute;
+  top: -34px;
+  left: -5%;
+  width: 110%;
+  max-width: none;
+  height: auto;
+  pointer-events: none;
 }

@@ -152,6 +152,7 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
         </button>
 
         <section className="xmas-sheet xmas-card" hidden={stage !== 'open'} aria-label="Your Christmas card">
+          <Image className="xmas-border" src="/c/border.webp" alt="" width={900} height={290} />
           <h2>Merry Christmas, {name}!</h2>
           {greeting && <p className="xmas-hi">{greeting}</p>}
           <p className="xmas-msg">{message}</p>
