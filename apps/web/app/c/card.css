@@ -368,33 +368,92 @@
 }
 .xmas-sleigh {
   position: relative;
-  width: min(340px, 74vw);
-  aspect-ratio: 900 / 408;
+  width: min(360px, 76vw);
+  aspect-ratio: 930 / 333;
   filter: drop-shadow(0 0 10px #ffd36b66);
 }
-.xmas-sleigh img {
+/* The poses take turns: stretched, gathered, tucked, gathered. Held still, only the first shows. */
+.xmas-pose {
   position: absolute;
-  top: 0;
+  inset: 0;
+  width: 100%;
   height: 100%;
   max-width: none;
 }
-.xmas-sled {
-  left: 0;
-  width: 48.67%;
+.xmas-pose-b,
+.xmas-pose-c {
+  opacity: 0;
 }
-/* The reindeer rock up and down as they leap, around the hitch where their hoof meets the sleigh */
-.xmas-team {
-  left: 48.44%;
-  width: 51.56%;
-  transform-origin: 1% 70%;
-  animation: xmas-gallop 0.7s ease-in-out infinite alternate;
+.xmas-fly[data-go] .xmas-pose {
+  animation-duration: 0.64s;
+  animation-iteration-count: infinite;
+  animation-timing-function: step-end;
 }
-@keyframes xmas-gallop {
+.xmas-fly[data-go] .xmas-pose-a {
+  animation-name: xmas-pose-a;
+}
+.xmas-fly[data-go] .xmas-pose-b {
+  animation-name: xmas-pose-b;
+}
+.xmas-fly[data-go] .xmas-pose-c {
+  animation-name: xmas-pose-c;
+}
+@keyframes xmas-pose-a {
+  0% {
+    opacity: 1;
+  }
+  25%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes xmas-pose-b {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes xmas-pose-c {
+  0%,
+  50%,
+  75%,
+  100% {
+    opacity: 0;
+  }
+  50.01% {
+    opacity: 1;
+  }
+}
+
+/* Sparkles left behind the sleigh */
+.xmas-trail {
+  position: absolute;
+  left: 4%;
+  top: calc(66% + var(--i) * 2.2%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff3b0;
+  box-shadow: 0 0 6px 2px #ffd36b;
+  opacity: 0;
+  animation: xmas-sparkle 1.3s ease-out infinite;
+  animation-delay: calc(var(--i) * 0.14s);
+}
+@keyframes xmas-sparkle {
   from {
-    transform: rotate(-3.2deg);
+    opacity: 1;
+    transform: translateX(0) scale(1);
   }
   to {
-    transform: rotate(2.6deg);
+    opacity: 0;
+    transform: translateX(-70px) translateY(12px) scale(0.3);
   }
 }
 

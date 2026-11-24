@@ -141,10 +141,23 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
         aria-hidden="true"
       >
         <div className="xmas-bob">
-          {/* Two pieces of the one picture: the team rocks as it gallops, hinged where it meets the sleigh. */}
+          {/* Three poses of the team, one after another, so the reindeer gallop. Santa and the sleigh stay put. */}
           <div className="xmas-sleigh">
-            <Image className="xmas-sled" src="/c/sled.webp" alt="" width={438} height={408} />
-            <Image className="xmas-team" src="/c/team.webp" alt="" width={464} height={408} />
+            {(['a', 'b', 'c'] as const).map((pose) => (
+              <Image
+                key={pose}
+                className={`xmas-pose xmas-pose-${pose}`}
+                src={`/c/sleigh-${pose}.webp`}
+                alt=""
+                width={760}
+                height={272}
+                loading="eager"
+              />
+            ))}
+            {/* A trail of golden sparkles behind the sleigh */}
+            {Array.from({ length: 9 }, (_, i) => (
+              <b key={i} className="xmas-trail" style={{ '--i': i } as React.CSSProperties} />
+            ))}
           </div>
         </div>
       </div>
