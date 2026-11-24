@@ -9,3 +9,8 @@ export function cronSecret() {
   if (!secret) throw new Error('CRON_SECRET is not set')
   return secret
 }
+
+/** The Christmas cards admin password. Empty on Vercel when it isn't set, which leaves that page closed. Off Vercel a fixed one. */
+export function cardsAdminPassword() {
+  return process.env.CARDS_ADMIN_PASSWORD ?? (onVercel ? '' : 'dev-cards-password')
+}

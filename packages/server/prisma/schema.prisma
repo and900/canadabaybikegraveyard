@@ -170,3 +170,30 @@ model SiteState {
 
   @@map("site_state")
 }
+
+/// Exactly one row (id = 1), created by the migration: the words every card shares unless a recipient has their own.
+model CardSettings {
+  id        Int      @id @default(1)
+  message   String
+  signoff   String
+  theme     String   @default("midnight")
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz
+
+  @@map("card_settings")
+}
+
+/// One Christmas card link. `code` is the unguessable part of /c/<code>.
+model CardRecipient {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code      String    @unique
+  /// Said on the envelope and the card, so "Tom and Hillary" is one name.
+  name      String
+  greeting  String?
+  /// Used in place of the shared message when set.
+  message   String?
+  /// The first time the envelope was opened.
+  openedAt  DateTime? @map("opened_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("card_recipients")
+}

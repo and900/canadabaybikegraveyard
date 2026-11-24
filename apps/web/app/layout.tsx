@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { connection } from 'next/server'
 import { Announcer } from '@/components/Announcer'
 import { Header } from '@/components/Header'
+import { SiteChrome } from '@/components/SiteChrome'
 import { RESTORE_CHOICE } from '@/lib/motion'
 import './globals.css'
 
@@ -33,7 +34,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: RESTORE_CHOICE }} />
       </head>
       <body className="flex min-h-dvh flex-col bg-white font-sans text-ink">
-        <Header />
+        <SiteChrome>
+          <Header />
+        </SiteChrome>
         {children}
         <Announcer />
       </body>

@@ -10,6 +10,8 @@ export default withBotId({
   // Photos are served exactly as stored (§4.3), and this leaves no image-resizing endpoint to abuse.
   images: { unoptimized: true },
   poweredByHeader: false,
+  // The Christmas card's link preview reads its picture and font from disk.
+  outputFileTracingIncludes: { '/c/[code]/opengraph-image': ['./lib/cards-assets/**'] },
   // pmtiles' fallback inflater, which no supported browser needs (see map/no-fflate.ts).
   turbopack: { resolveAlias: { fflate: { browser: './map/no-fflate.ts' } } },
 } satisfies NextConfig)

@@ -1,0 +1,381 @@
+@font-face {
+  font-family: 'Mountains of Christmas';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/mountains-of-christmas-latin-700-normal.woff2') format('woff2');
+}
+
+.xmas {
+  --paper: #fff8ec;
+  --ink: #2a2233;
+  --accent: #c8312f;
+  --glow: #ffd36b;
+  --edge: #e8dcc4;
+  --tint: transparent;
+  --display: 'Mountains of Christmas', Georgia, serif;
+  position: relative;
+  flex: 1;
+  min-height: 100dvh;
+  overflow-x: clip;
+  color: var(--ink);
+  background: #0e1a3a;
+}
+.xmas[data-theme='pine'] {
+  --accent: #a87a1f;
+  --glow: #ffe9a8;
+  --tint: rgb(10 90 60 / 0.5);
+}
+.xmas[data-theme='berry'] {
+  --accent: #d6455d;
+  --glow: #ffb3c1;
+  --tint: rgb(150 20 90 / 0.5);
+}
+.xmas * {
+  box-sizing: border-box;
+}
+
+/* The painted night, fixed behind everything; a theme tints its sky and leaves the village warm. */
+.xmas-bg {
+  position: fixed;
+  inset: 0;
+  background: url('/c/bg.webp') center bottom / cover no-repeat;
+}
+.xmas-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, var(--tint), transparent 60%);
+  mix-blend-mode: color;
+}
+.xmas canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.xmas-lights {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  display: flex;
+  justify-content: space-around;
+  z-index: 2;
+  pointer-events: none;
+  padding-top: env(safe-area-inset-top, 0);
+}
+.xmas-lights::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #0006;
+}
+.xmas-lights i {
+  width: 12px;
+  height: 18px;
+  margin-top: 14px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--c);
+  box-shadow: 0 0 14px 4px var(--c);
+  animation: xmas-tw 2.4s infinite;
+  animation-delay: var(--d);
+}
+@media (max-width: 700px) {
+  .xmas-lights i:nth-child(n + 11) {
+    display: none;
+  }
+}
+@keyframes xmas-tw {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+
+.xmas main {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 84px 20px 40px;
+}
+.xmas h1,
+.xmas h2 {
+  font-family: var(--display);
+  margin: 0;
+}
+.xmas-sheet {
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: 0 20px 50px #0007;
+  max-width: 440px;
+  width: 100%;
+  padding: 28px 24px;
+  border: 3px double var(--edge);
+}
+
+/* Envelope */
+.xmas-env {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: #fff;
+  font: inherit;
+  text-shadow: 0 2px 8px #000a;
+}
+.xmas-env[hidden] {
+  display: none;
+}
+.xmas-env:focus-visible,
+.xmas-tree:focus-visible,
+.xmas-again:focus-visible {
+  outline: 3px solid var(--glow);
+  outline-offset: 4px;
+}
+.xmas-to {
+  font-family: var(--display);
+  font-size: 2.4rem;
+  line-height: 1;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.xmas-hint {
+  font-size: 1.05rem;
+}
+.xmas-envbox {
+  position: relative;
+  width: min(300px, 80vw);
+  aspect-ratio: 3 / 2;
+  background: var(--paper);
+  border-radius: 4px;
+  box-shadow: 0 18px 40px #0008;
+  overflow: hidden;
+}
+.xmas-envbox::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom right, transparent 49.5%, var(--edge) 50%) 0 0 / 50% 100% no-repeat,
+    linear-gradient(to bottom left, transparent 49.5%, var(--edge) 50%) 100% 0 / 50% 100% no-repeat;
+}
+.xmas-flap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 60%;
+  background: var(--accent);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top;
+  transition: transform 0.7s;
+}
+.xmas-seal {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 38px;
+  height: 38px;
+  margin: -19px;
+  border-radius: 50%;
+  background: var(--glow);
+  box-shadow: 0 0 18px var(--glow);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  animation: xmas-pulse 2s infinite;
+}
+@keyframes xmas-pulse {
+  50% {
+    transform: scale(1.12);
+  }
+}
+.xmas-env[data-open] .xmas-flap {
+  transform: rotateX(180deg);
+}
+.xmas-env[data-open] .xmas-seal {
+  display: none;
+}
+
+/* Card */
+.xmas-card {
+  text-align: center;
+  animation: xmas-rise 0.9s ease-out;
+}
+.xmas-card[hidden] {
+  display: none;
+}
+@keyframes xmas-rise {
+  from {
+    opacity: 0;
+    transform: translateY(40px) rotate(-1.5deg);
+  }
+}
+.xmas-card h2 {
+  font-size: 2.6rem;
+  line-height: 1.05;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}
+.xmas-hi {
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0.9rem 0 0;
+  font-size: 1.1rem;
+}
+.xmas-msg {
+  white-space: pre-wrap;
+  font-size: 1.12rem;
+  line-height: 1.55;
+  margin: 1.1rem 0;
+  text-align: left;
+}
+.xmas-from {
+  font-family: var(--display);
+  font-size: 1.7rem;
+}
+
+/* The tree: tapped, it glows and its baubles twinkle */
+.xmas-tree {
+  position: relative;
+  display: block;
+  margin: 0.8rem auto 0;
+  width: 150px;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.xmas-tree img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: filter 0.4s;
+}
+.xmas-tree[aria-pressed='true'] img {
+  filter: brightness(1.12) saturate(1.15) drop-shadow(0 0 12px var(--glow));
+}
+.xmas-tree b {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 8px 3px var(--glow),
+    0 0 16px 6px #fff8;
+  opacity: 0;
+}
+.xmas-tree[aria-pressed='true'] b {
+  animation: xmas-twinkle 1.4s ease-in-out infinite;
+  animation-delay: var(--d);
+}
+@keyframes xmas-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.xmas-tap {
+  font-size: 0.8rem;
+  opacity: 0.65;
+  margin-top: 2px;
+}
+.xmas-again {
+  margin-top: 18px;
+  position: relative;
+  z-index: 2;
+  background: #ffffff26;
+  color: #fff;
+  border: 1px solid #ffffff66;
+  border-radius: 99px;
+  padding: 0.5rem 0.95rem;
+  font: 700 0.9rem inherit;
+  cursor: pointer;
+}
+.xmas-again[hidden] {
+  display: none;
+}
+
+/* Santa's sleigh crosses once, trailing a banner */
+.xmas-fly {
+  position: fixed;
+  top: 16vh;
+  left: 0;
+  z-index: 3;
+  display: none;
+  align-items: center;
+  pointer-events: none;
+  will-change: transform;
+}
+.xmas-fly[data-go] {
+  display: flex;
+  animation: xmas-cross 9s linear forwards;
+}
+.xmas-bob {
+  display: flex;
+  align-items: center;
+  animation: xmas-bobbing 1.6s ease-in-out infinite;
+}
+@keyframes xmas-cross {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(100vw);
+  }
+}
+@keyframes xmas-bobbing {
+  50% {
+    transform: translateY(-14px) rotate(1.5deg);
+  }
+}
+.xmas-banner {
+  background: var(--paper);
+  color: var(--accent);
+  font: 700 1.25rem var(--display);
+  padding: 0.35rem 1.4rem 0.35rem 0.9rem;
+  white-space: nowrap;
+  clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%);
+  filter: drop-shadow(0 0 10px var(--glow));
+}
+.xmas-rope {
+  width: 22px;
+  height: 2px;
+  background: var(--glow);
+  flex: none;
+}
+.xmas-fly img {
+  display: block;
+  width: min(320px, 70vw);
+  height: auto;
+  flex: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xmas *,
+  .xmas *::before,
+  .xmas *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
