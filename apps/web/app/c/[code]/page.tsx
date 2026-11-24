@@ -10,7 +10,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const card = await cardByCode((await params).code)
   return {
     title: { absolute: card ? `A Christmas card for ${card.name}` : 'Christmas card' },
-    description: 'Tap the envelope to open your Christmas card.',
+    description: 'Tap then tap the envelope to open your Christmas card',
+    // What WhatsApp and Messenger show under the picture: three short lines and no sales pitch.
+    openGraph: {
+      title: 'Merry Christmas!',
+      description: card
+        ? `A Christmas card for ${card.name}. Tap then tap the envelope to open your Christmas card`
+        : 'Tap then tap the envelope to open your Christmas card',
+      type: 'website',
+    },
     // Only the people sent the link need it: it stays out of search results.
     robots: { index: false, follow: false },
   }

@@ -16,6 +16,7 @@
   --display: 'Mountains of Christmas', Georgia, serif;
   position: relative;
   flex: 1;
+  --holly: clamp(64px, 12vw, 120px);
   min-height: 100dvh;
   overflow-x: clip;
   color: var(--ink);
@@ -39,6 +40,7 @@
 .xmas-bg {
   position: fixed;
   inset: 0;
+  z-index: 0;
   background: url('/c/bg.webp') center bottom / cover no-repeat;
 }
 .xmas-bg::after {
@@ -55,116 +57,179 @@
   z-index: 0;
 }
 
-.xmas-lights {
-  position: fixed;
+/* The garland along the top */
+.xmas-holly {
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 56px;
+  height: var(--holly);
+  overflow: hidden;
   display: flex;
-  justify-content: space-around;
-  z-index: 2;
+  z-index: 4;
   pointer-events: none;
-  padding-top: env(safe-area-inset-top, 0);
 }
-.xmas-lights::before {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #0006;
+.xmas-holly img {
+  flex: none;
+  width: auto;
+  max-width: none;
+  height: 100%;
 }
-.xmas-lights i {
-  width: 12px;
-  height: 18px;
-  margin-top: 14px;
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  background: var(--c);
-  box-shadow: 0 0 14px 4px var(--c);
-  animation: xmas-tw 2.4s infinite;
-  animation-delay: var(--d);
-}
-@media (max-width: 700px) {
-  .xmas-lights i:nth-child(n + 11) {
-    display: none;
-  }
-}
-@keyframes xmas-tw {
-  50% {
-    opacity: 0.35;
-    transform: scale(0.85);
-  }
+.xmas-holly img[data-flip] {
+  transform: scaleX(-1);
 }
 
-.xmas main {
-  position: relative;
-  z-index: 1;
-  min-height: 100dvh;
+/* The tree, always lit, under the garland at the left, with the greeting beside it */
+.xmas-head {
+  position: absolute;
+  top: calc(var(--holly) - 14px);
+  left: 14px;
+  right: 14px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 84px 20px 40px;
+  gap: 12px;
+  pointer-events: none;
+}
+.xmas-tree {
+  position: relative;
+  z-index: 2;
+  flex: none;
+  width: clamp(58px, 9vw, 88px);
+}
+.xmas-tree img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: brightness(1.12) saturate(1.15) drop-shadow(0 0 12px var(--glow));
+}
+.xmas-tree b {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 8px 3px var(--glow),
+    0 0 16px 6px #fff8;
+  opacity: 0;
+  animation: xmas-twinkle 1.4s ease-in-out infinite;
+  animation-delay: var(--d);
+}
+@keyframes xmas-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 .xmas h1,
 .xmas h2 {
   font-family: var(--display);
   margin: 0;
 }
-.xmas-sheet {
-  background: var(--paper);
-  border-radius: 6px;
-  box-shadow: 0 20px 50px #0007;
-  max-width: 440px;
-  width: 100%;
-  padding: 28px 24px;
-  border: 3px double var(--edge);
+.xmas h1 {
+  position: relative;
+  z-index: 4;
+  color: #fff;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  line-height: 1;
+  text-shadow:
+    0 2px 10px #000b,
+    0 0 18px var(--glow);
 }
 
-/* Envelope */
+/* The card sits at the bottom, under the open sky */
+.xmas main {
+  position: relative;
+  z-index: 5;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: calc(var(--holly) + 110px) 16px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Envelope: its front is addressed; a tap turns it over, and the flap opens */
 .xmas-env {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
+  margin-bottom: 6vh;
   background: none;
   border: 0;
   cursor: pointer;
   color: #fff;
   font: inherit;
   text-shadow: 0 2px 8px #000a;
+  perspective: 1100px;
 }
-.xmas-env[hidden] {
-  display: none;
-}
-.xmas-env:focus-visible,
-.xmas-tree:focus-visible,
-.xmas-again:focus-visible {
+.xmas-env:focus-visible {
   outline: 3px solid var(--glow);
-  outline-offset: 4px;
-}
-.xmas-to {
-  font-family: var(--display);
-  font-size: 2.4rem;
-  line-height: 1;
-  text-align: center;
-  overflow-wrap: anywhere;
+  outline-offset: 6px;
 }
 .xmas-hint {
   font-size: 1.05rem;
 }
-.xmas-envbox {
+.xmas-turn {
   position: relative;
-  width: min(300px, 80vw);
+  display: block;
+  width: min(320px, 82vw);
   aspect-ratio: 3 / 2;
+  transform-style: preserve-3d;
+  transition: transform 0.9s ease-in-out;
+}
+.xmas-env[data-stage='turning'] .xmas-turn,
+.xmas-env[data-stage='flap'] .xmas-turn {
+  transform: rotateY(180deg);
+}
+.xmas-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
   background: var(--paper);
   border-radius: 4px;
   box-shadow: 0 18px 40px #0008;
-  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
-.xmas-envbox::before {
+.xmas-back {
+  transform: rotateY(180deg);
+}
+.xmas-label {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 50%;
+  transform: translateY(-40%);
+  color: var(--ink);
+  font: 700 clamp(1.5rem, 7vw, 2.1rem) / 1.1 var(--display);
+  text-align: center;
+  text-shadow: none;
+  overflow-wrap: anywhere;
+}
+.xmas-stamp {
+  position: absolute;
+  top: 8%;
+  right: 6%;
+  width: 14%;
+  aspect-ratio: 4 / 5;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--glow);
+  border: 2px dashed var(--paper);
+  outline: 2px solid var(--accent);
+  font-size: 1.2rem;
+  text-shadow: none;
+}
+.xmas-back::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -196,6 +261,7 @@
   display: grid;
   place-items: center;
   font-size: 20px;
+  text-shadow: none;
   animation: xmas-pulse 2s infinite;
 }
 @keyframes xmas-pulse {
@@ -203,32 +269,58 @@
     transform: scale(1.12);
   }
 }
-.xmas-env[data-open] .xmas-flap {
+.xmas-env[data-stage='flap'] .xmas-flap {
   transform: rotateX(180deg);
 }
-.xmas-env[data-open] .xmas-seal {
+.xmas-env[data-stage='flap'] .xmas-seal {
   display: none;
 }
 
-/* Card */
+/* Card: folded, with the village scene and a white border on its front, then it opens to the message */
 .xmas-card {
   position: relative;
-  margin-top: 40px;
-  padding-top: 64px;
-  text-align: center;
+  width: min(440px, 100%);
+  perspective: 1500px;
   animation: xmas-rise 0.9s ease-out;
-}
-.xmas-card[hidden] {
-  display: none;
 }
 @keyframes xmas-rise {
   from {
     opacity: 0;
-    transform: translateY(40px) rotate(-1.5deg);
+    transform: translateY(60px);
   }
 }
-.xmas-card h2 {
-  font-size: 2.6rem;
+.xmas-sheet {
+  background: var(--paper);
+  border: 3px double var(--edge);
+  border-radius: 6px;
+  box-shadow: 0 20px 50px #0007;
+  padding: 22px 22px 18px;
+  text-align: center;
+  max-height: calc(100dvh - var(--holly) - 150px);
+  overflow-y: auto;
+}
+.xmas-cover {
+  position: absolute;
+  inset: 0;
+  border: 10px solid #fff;
+  border-radius: 6px;
+  background: url('/c/bg.webp') center 85% / cover no-repeat;
+  box-shadow:
+    0 20px 50px #0007,
+    inset 0 0 0 1px #0002;
+  transform-origin: left center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition:
+    transform 1.1s ease-in-out,
+    visibility 0s 1.1s;
+}
+.xmas-card[data-stage='open'] .xmas-cover {
+  transform: rotateY(-172deg);
+  visibility: hidden;
+}
+.xmas-sheet h2 {
+  font-size: clamp(1.9rem, 7vw, 2.5rem);
   line-height: 1.05;
   color: var(--accent);
   overflow-wrap: anywhere;
@@ -236,166 +328,86 @@
 .xmas-hi {
   font-weight: 700;
   color: var(--accent);
-  margin: 0.9rem 0 0;
-  font-size: 1.1rem;
+  margin: 0.7rem 0 0;
+  font-size: 1.05rem;
 }
 .xmas-msg {
   white-space: pre-wrap;
-  font-size: 1.12rem;
-  line-height: 1.55;
-  margin: 1.1rem 0;
+  font-size: clamp(1rem, 3.8vw, 1.12rem);
+  line-height: 1.5;
+  margin: 0.9rem 0;
   text-align: left;
 }
 .xmas-from {
   font-family: var(--display);
-  font-size: 1.7rem;
+  font-size: 1.5rem;
 }
 
-/* The tree: tapped, it glows and its baubles twinkle */
-.xmas-tree {
-  position: relative;
-  display: block;
-  margin: 0.8rem auto 0;
-  width: 150px;
-  padding: 0;
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-.xmas-tree img {
-  display: block;
-  width: 100%;
-  height: auto;
-  transition: filter 0.4s;
-}
-.xmas-tree[aria-pressed='true'] img {
-  filter: brightness(1.12) saturate(1.15) drop-shadow(0 0 12px var(--glow));
-}
-.xmas-tree b {
-  position: absolute;
-  width: 9px;
-  height: 9px;
-  margin: -4px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow:
-    0 0 8px 3px var(--glow),
-    0 0 16px 6px #fff8;
-  opacity: 0;
-}
-.xmas-tree[aria-pressed='true'] b {
-  animation: xmas-twinkle 1.4s ease-in-out infinite;
-  animation-delay: var(--d);
-}
-@keyframes xmas-twinkle {
-  0%,
-  100% {
-    opacity: 0;
-    transform: scale(0.4);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-.xmas-tap {
-  font-size: 0.8rem;
-  opacity: 0.65;
-  margin-top: 2px;
-}
-.xmas-again {
-  margin-top: 18px;
-  position: relative;
-  z-index: 2;
-  background: #ffffff26;
-  color: #fff;
-  border: 1px solid #ffffff66;
-  border-radius: 99px;
-  padding: 0.5rem 0.95rem;
-  font: 700 0.9rem inherit;
-  cursor: pointer;
-}
-.xmas-again[hidden] {
-  display: none;
-}
-
-/* Santa's sleigh floats along the bottom of the scene once, and a banner sails across the top */
-.xmas-fly {
+/* Santa: flown by script; the gallop and the sparkles are CSS loops that never restart as he changes course */
+.xmas-santa {
   position: fixed;
+  top: 0;
   left: 0;
-  z-index: 3;
-  display: none;
-  align-items: center;
+  width: min(280px, 58vw);
   pointer-events: none;
   will-change: transform;
+  display: none;
 }
-.xmas-fly[data-go] {
-  display: flex;
-  animation: xmas-cross 10s linear forwards;
+.xmas-santa[data-layer] {
+  display: block;
 }
-.xmas-fly-banner {
-  top: calc(70px + env(safe-area-inset-top, 0px));
-  animation-duration: 11s;
-  animation-delay: 0.6s;
+.xmas-santa[data-layer='back'] {
+  z-index: 1;
 }
-.xmas-fly-sleigh {
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+.xmas-santa[data-layer='mid'] {
+  z-index: 3;
+}
+.xmas-santa[data-layer='front'] {
+  z-index: 7;
+}
+.xmas-lean {
+  position: relative;
+}
+.xmas-flip {
+  transition: transform 0.7s ease-in-out;
+}
+.xmas-santa[data-left] .xmas-flip {
+  transform: scaleX(-1);
 }
 .xmas-bob {
-  animation: xmas-bobbing 1.6s ease-in-out infinite;
-}
-@keyframes xmas-cross {
-  from {
-    transform: translateX(-110%);
-  }
-  to {
-    transform: translateX(100vw);
-  }
+  animation: xmas-bobbing 1.8s ease-in-out infinite;
 }
 @keyframes xmas-bobbing {
   50% {
-    transform: translateY(-12px) rotate(1deg);
+    transform: translateY(-8px);
   }
-}
-.xmas-banner {
-  background: var(--paper);
-  color: var(--accent);
-  font: 700 1.25rem var(--display);
-  padding: 0.35rem 1.4rem 0.35rem 0.9rem;
-  white-space: nowrap;
-  clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%);
-  filter: drop-shadow(0 0 10px var(--glow));
 }
 .xmas-sleigh {
   position: relative;
-  width: min(360px, 76vw);
+  width: 100%;
   aspect-ratio: 930 / 333;
   filter: drop-shadow(0 0 10px #ffd36b66);
 }
-/* The poses take turns: stretched, gathered, tucked, gathered. Held still, only the first shows. */
+/* The poses take turns: stretched, gathered, tucked, gathered; a step every 0.3 seconds */
 .xmas-pose {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   max-width: none;
-}
-.xmas-pose-b,
-.xmas-pose-c {
-  opacity: 0;
-}
-.xmas-fly[data-go] .xmas-pose {
-  animation-duration: 0.64s;
+  animation-duration: 1.2s;
   animation-iteration-count: infinite;
   animation-timing-function: step-end;
 }
-.xmas-fly[data-go] .xmas-pose-a {
+.xmas-pose-a {
   animation-name: xmas-pose-a;
 }
-.xmas-fly[data-go] .xmas-pose-b {
+.xmas-pose-b {
+  opacity: 0;
   animation-name: xmas-pose-b;
 }
-.xmas-fly[data-go] .xmas-pose-c {
+.xmas-pose-c {
+  opacity: 0;
   animation-name: xmas-pose-c;
 }
 @keyframes xmas-pose-a {
@@ -432,7 +444,35 @@
   }
 }
 
-/* Sparkles left behind the sleigh */
+/* The banner he tows behind him, and golden sparkles */
+.xmas-tow {
+  position: absolute;
+  top: 38%;
+  right: 88%;
+}
+.xmas-santa[data-left] .xmas-tow {
+  right: auto;
+  left: 88%;
+}
+.xmas-tow span {
+  display: block;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  color: var(--accent);
+  font: 700 1rem var(--display);
+  padding: 0.2rem 0.9rem;
+  white-space: nowrap;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 6% 50%);
+  filter: drop-shadow(0 0 8px var(--glow));
+  animation: xmas-wave 1.6s ease-in-out infinite;
+}
+.xmas-santa[data-left] .xmas-tow span {
+  clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%);
+}
+@keyframes xmas-wave {
+  50% {
+    transform: translateY(4px) skewY(2deg);
+  }
+}
 .xmas-trail {
   position: absolute;
   left: 4%;
@@ -464,15 +504,4 @@
     animation: none !important;
     transition: none !important;
   }
-}
-
-/* The holly garland lies across the top edge of the card */
-.xmas-border {
-  position: absolute;
-  top: -34px;
-  left: -5%;
-  width: 110%;
-  max-width: none;
-  height: auto;
-  pointer-events: none;
 }

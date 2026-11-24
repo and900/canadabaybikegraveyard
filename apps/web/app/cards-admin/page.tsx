@@ -138,7 +138,7 @@ export default async function CardsAdmin({ searchParams }: { searchParams: Promi
                 <div className="mt-2 flex flex-wrap gap-2">
                   <CopyLink url={url} />
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(`Merry Christmas! A card for you: ${url}`)}`}
+                    href={`https://wa.me/?text=${encodeURIComponent(url)}`}
                     className="inline-flex min-h-11 items-center rounded-[10px] border border-edge px-3 font-bold"
                   >
                     WhatsApp

@@ -2,6 +2,7 @@
 import type { CardTheme } from '@iwb/shared'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
+import { Santa } from './Santa'
 
 export type CardProps = {
   code: string
@@ -12,7 +13,6 @@ export type CardProps = {
   theme: CardTheme
 }
 
-const LIGHTS = ['#ff5a5a', '#ffd36b', '#6bc7ff', '#8be28b', '#ff9be0']
 /** Where the tree's baubles twinkle, as a percentage of its picture. */
 const SPARKS = [
   [50, 5],
@@ -79,15 +79,15 @@ function useSnow() {
   return canvas
 }
 
+type Stage = 'sealed' | 'turning' | 'flap' | 'folded' | 'open'
+
 /**
- * The card: a sealed envelope for the recipient, which opens on a tap to the card with its message, a tree that lights
- * when tapped, and Santa's sleigh crossing once with a banner. The first tap tells the site the card was opened.
+ * The card: a closed envelope addressed to the recipient. A tap turns it over, opens its flap, and out comes a folded
+ * card with the village scene on its front, which opens to the message. The tree is always lit beside the greeting,
+ * and Santa flies round the scene. The first tap tells the site the card was opened.
  */
 export function CardView({ code, name, greeting, message, signoff, theme }: CardProps) {
-  const [stage, setStage] = useState<'sealed' | 'opening' | 'open'>('sealed')
-  const [lit, setLit] = useState(false)
-  // Each flight is a new number, so the sleigh's animation starts from the left again.
-  const [flight, setFlight] = useState(0)
+  const [stage, setStage] = useState<Stage>('sealed')
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
   const canvas = useSnow()
   useEffect(() => {
@@ -95,118 +95,74 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
     return () => pending.forEach(clearTimeout)
   }, [])
 
-  const fly = () => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    setFlight((number) => number + 1)
-  }
-
   const open = () => {
     if (stage !== 'sealed') return
-    setStage('opening')
+    setStage('turning')
     void fetch(`/api/c/${code}/open`, { method: 'POST', keepalive: true }).catch(() => {})
-    timers.current.push(
-      setTimeout(() => {
-        setStage('open')
-        timers.current.push(setTimeout(fly, 500))
-      }, 750),
-    )
+    const later = (ms: number, next: Stage) => timers.current.push(setTimeout(() => setStage(next), ms))
+    later(900, 'flap')
+    later(1700, 'folded')
+    later(3000, 'open')
   }
+  const envelope = stage === 'sealed' || stage === 'turning' || stage === 'flap'
 
   return (
     <div className="xmas" data-theme={theme}>
       <div className="xmas-bg" aria-hidden="true" />
       <canvas ref={canvas} aria-hidden="true" />
-      <div className="xmas-lights" aria-hidden="true">
-        {Array.from({ length: 22 }, (_, i) => (
-          <i
-            key={i}
-            style={{ '--c': LIGHTS[i % LIGHTS.length], '--d': `${(i * 0.37) % 2.4}s` } as React.CSSProperties}
-          />
+
+      {/* The garland along the top, its pictures turned over alternately so they join up at any width. */}
+      <div className="xmas-holly" aria-hidden="true">
+        {Array.from({ length: 5 }, (_, i) => (
+          <Image key={i} src="/c/border.webp" alt="" width={900} height={202} data-flip={i % 2 ? '' : undefined} />
         ))}
       </div>
-
-      {/* Keyed by the flight, so each one starts over. The banner sails across the top, the sleigh along the bottom. */}
-      <div
-        key={`banner-${flight}`}
-        className="xmas-fly xmas-fly-banner"
-        data-go={flight ? '' : undefined}
-        aria-hidden="true"
-      >
-        <div className="xmas-banner">Merry Christmas, {name}!</div>
-      </div>
-      <div
-        key={`sleigh-${flight}`}
-        className="xmas-fly xmas-fly-sleigh"
-        data-go={flight ? '' : undefined}
-        aria-hidden="true"
-      >
-        <div className="xmas-bob">
-          {/* Three poses of the team, one after another, so the reindeer gallop. Santa and the sleigh stay put. */}
-          <div className="xmas-sleigh">
-            {(['a', 'b', 'c'] as const).map((pose) => (
-              <Image
-                key={pose}
-                className={`xmas-pose xmas-pose-${pose}`}
-                src={`/c/sleigh-${pose}.webp`}
-                alt=""
-                width={760}
-                height={272}
-                loading="eager"
-              />
-            ))}
-            {/* A trail of golden sparkles behind the sleigh */}
-            {Array.from({ length: 9 }, (_, i) => (
-              <b key={i} className="xmas-trail" style={{ '--i': i } as React.CSSProperties} />
-            ))}
-          </div>
+      <div className="xmas-head">
+        <div className="xmas-tree" aria-hidden="true">
+          <Image src="/c/tree.webp" alt="" width={420} height={628} />
+          {SPARKS.map(([x, y], i) => (
+            <b key={i} style={{ left: `${x}%`, top: `${y}%`, '--d': `${(i * 0.23) % 1.4}s` } as React.CSSProperties} />
+          ))}
         </div>
+        <h1>Merry Christmas!</h1>
       </div>
+
+      <Santa name={name} run={stage !== 'sealed'} />
 
       <main>
-        <button
-          type="button"
-          className="xmas-env"
-          hidden={stage === 'open'}
-          data-open={stage === 'opening' ? '' : undefined}
-          aria-label={`Open your Christmas card, ${name}`}
-          onClick={open}
-        >
-          <span className="xmas-to">For {name}</span>
-          <span className="xmas-envbox">
-            <span className="xmas-flap" />
-            <span className="xmas-seal">★</span>
-          </span>
-          <span className="xmas-hint">Tap to open</span>
-        </button>
-
-        <section className="xmas-sheet xmas-card" hidden={stage !== 'open'} aria-label="Your Christmas card">
-          <Image className="xmas-border" src="/c/border.webp" alt="" width={900} height={290} />
-          <h2>Merry Christmas, {name}!</h2>
-          {greeting && <p className="xmas-hi">{greeting}</p>}
-          <p className="xmas-msg">{message}</p>
-          <div className="xmas-from">{signoff}</div>
+        {envelope && (
           <button
             type="button"
-            className="xmas-tree"
-            aria-pressed={lit}
-            aria-label="Light up the tree"
-            onClick={() => setLit((on) => !on)}
+            className="xmas-env"
+            data-stage={stage}
+            aria-label={`Open your Christmas card, ${name}`}
+            onClick={open}
           >
-            <Image src="/c/tree.webp" alt="" width={420} height={628} />
-            {SPARKS.map(([x, y], i) => (
-              <b
-                key={i}
-                aria-hidden="true"
-                style={{ left: `${x}%`, top: `${y}%`, '--d': `${(i * 0.23) % 1.4}s` } as React.CSSProperties}
-              />
-            ))}
+            <span className="xmas-turn">
+              <span className="xmas-face xmas-front">
+                <span className="xmas-stamp">★</span>
+                <span className="xmas-label">To: {name}</span>
+              </span>
+              <span className="xmas-face xmas-back">
+                <span className="xmas-flap" />
+                <span className="xmas-seal">★</span>
+              </span>
+            </span>
+            <span className="xmas-hint">Tap to open</span>
           </button>
-          <div className="xmas-tap">Tap the tree</div>
-        </section>
+        )}
 
-        <button type="button" className="xmas-again" hidden={stage !== 'open'} onClick={fly}>
-          Watch Santa again
-        </button>
+        {!envelope && (
+          <section className="xmas-card" data-stage={stage} aria-label="Your Christmas card">
+            <div className="xmas-sheet">
+              <h2>{name}</h2>
+              {greeting && <p className="xmas-hi">{greeting}</p>}
+              <p className="xmas-msg">{message}</p>
+              <div className="xmas-from">{signoff}</div>
+            </div>
+            <div className="xmas-cover" aria-hidden="true" />
+          </section>
+        )}
       </main>
     </div>
   )
