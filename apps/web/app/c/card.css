@@ -319,10 +319,9 @@
   display: none;
 }
 
-/* Santa's sleigh crosses once, trailing a banner */
+/* Santa's sleigh floats along the bottom of the scene once, and a banner sails across the top */
 .xmas-fly {
   position: fixed;
-  top: 16vh;
   left: 0;
   z-index: 3;
   display: none;
@@ -332,11 +331,17 @@
 }
 .xmas-fly[data-go] {
   display: flex;
-  animation: xmas-cross 9s linear forwards;
+  animation: xmas-cross 10s linear forwards;
+}
+.xmas-fly-banner {
+  top: calc(70px + env(safe-area-inset-top, 0px));
+  animation-duration: 11s;
+  animation-delay: 0.6s;
+}
+.xmas-fly-sleigh {
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
 }
 .xmas-bob {
-  display: flex;
-  align-items: center;
   animation: xmas-bobbing 1.6s ease-in-out infinite;
 }
 @keyframes xmas-cross {
@@ -349,7 +354,7 @@
 }
 @keyframes xmas-bobbing {
   50% {
-    transform: translateY(-14px) rotate(1.5deg);
+    transform: translateY(-12px) rotate(1deg);
   }
 }
 .xmas-banner {
@@ -361,17 +366,36 @@
   clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%);
   filter: drop-shadow(0 0 10px var(--glow));
 }
-.xmas-rope {
-  width: 22px;
-  height: 2px;
-  background: var(--glow);
-  flex: none;
+.xmas-sleigh {
+  position: relative;
+  width: min(340px, 74vw);
+  aspect-ratio: 900 / 408;
+  filter: drop-shadow(0 0 10px #ffd36b66);
 }
-.xmas-fly img {
-  display: block;
-  width: min(320px, 70vw);
-  height: auto;
-  flex: none;
+.xmas-sleigh img {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  max-width: none;
+}
+.xmas-sled {
+  left: 0;
+  width: 48.67%;
+}
+/* The reindeer rock up and down as they leap, around the hitch where their hoof meets the sleigh */
+.xmas-team {
+  left: 48.44%;
+  width: 51.56%;
+  transform-origin: 1% 70%;
+  animation: xmas-gallop 0.7s ease-in-out infinite alternate;
+}
+@keyframes xmas-gallop {
+  from {
+    transform: rotate(-3.2deg);
+  }
+  to {
+    transform: rotate(2.6deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

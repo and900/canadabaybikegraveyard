@@ -125,12 +125,27 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
         ))}
       </div>
 
-      {/* Keyed by the flight, so each one starts over. */}
-      <div className="xmas-fly" key={flight} data-go={flight ? '' : undefined} aria-hidden="true">
+      {/* Keyed by the flight, so each one starts over. The banner sails across the top, the sleigh along the bottom. */}
+      <div
+        key={`banner-${flight}`}
+        className="xmas-fly xmas-fly-banner"
+        data-go={flight ? '' : undefined}
+        aria-hidden="true"
+      >
+        <div className="xmas-banner">Merry Christmas, {name}!</div>
+      </div>
+      <div
+        key={`sleigh-${flight}`}
+        className="xmas-fly xmas-fly-sleigh"
+        data-go={flight ? '' : undefined}
+        aria-hidden="true"
+      >
         <div className="xmas-bob">
-          <div className="xmas-banner">Merry Christmas, {name}!</div>
-          <div className="xmas-rope" />
-          <Image src="/c/sleigh.webp" alt="" width={900} height={407} />
+          {/* Two pieces of the one picture: the team rocks as it gallops, hinged where it meets the sleigh. */}
+          <div className="xmas-sleigh">
+            <Image className="xmas-sled" src="/c/sled.webp" alt="" width={438} height={408} />
+            <Image className="xmas-team" src="/c/team.webp" alt="" width={464} height={408} />
+          </div>
         </div>
       </div>
 
