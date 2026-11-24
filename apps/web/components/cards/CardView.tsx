@@ -1,7 +1,7 @@
 'use client'
 import type { CardTheme } from '@iwb/shared'
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Santa } from './Santa'
 
 export type CardProps = {
@@ -79,7 +79,7 @@ function useSnow() {
   return canvas
 }
 
-type Stage = 'sealed' | 'turning' | 'flap' | 'folded' | 'open'
+type Stage = 'sealed' | 'turning' | 'flap' | 'rising' | 'folded' | 'open'
 
 /**
  * The card: a closed envelope addressed to the recipient. A tap turns it over, opens its flap, and out comes a folded
@@ -89,6 +89,10 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
   const [stage, setStage] = useState<Stage>('sealed')
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
   const canvas = useSnow()
+  const peek = useRef<HTMLSpanElement>(null)
+  const card = useRef<HTMLElement>(null)
+  /** Where the card was, peeking from the envelope, when it set off for its place. */
+  const from = useRef<DOMRect | null>(null)
   useEffect(() => {
     const pending = timers.current
     return () => pending.forEach(clearTimeout)
@@ -100,8 +104,14 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
     void fetch(`/api/c/${code}/open`, { method: 'POST', keepalive: true }).catch(() => {})
     const later = (ms: number, next: Stage) => timers.current.push(setTimeout(() => setStage(next), ms))
     later(900, 'flap')
-    later(1700, 'folded')
-    later(3000, 'open')
+    later(1700, 'rising')
+    timers.current.push(
+      setTimeout(() => {
+        from.current = peek.current?.getBoundingClientRect() ?? null
+        setStage('folded')
+      }, 3000),
+    )
+    later(4200, 'open')
   }
   /** Back to the closed envelope, and Santa starts his flight again. */
   const restart = () => {
@@ -109,7 +119,24 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
     timers.current = []
     setStage('sealed')
   }
-  const envelope = stage === 'sealed' || stage === 'turning' || stage === 'flap'
+  const envelope = stage !== 'open'
+  const cardShown = stage === 'folded' || stage === 'open'
+
+  // The card sets off from where it peeked out of the envelope and settles in its place at the bottom.
+  useLayoutEffect(() => {
+    const element = card.current
+    const start = from.current
+    if (stage !== 'folded' || !element || !start) return
+    from.current = null
+    const end = element.getBoundingClientRect()
+    const dx = start.left + start.width / 2 - (end.left + end.width / 2)
+    const dy = start.top + start.height / 2 - (end.top + end.height / 2)
+    element.style.transition = 'none'
+    element.style.transform = `translate(${dx}px, ${dy}px) scale(${start.width / end.width})`
+    void element.offsetWidth
+    element.style.transition = 'transform 1.1s ease-in-out'
+    element.style.transform = ''
+  }, [stage])
 
   return (
     <div className="xmas" data-theme={theme}>
@@ -137,6 +164,8 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
             aria-label={`Open your Christmas card, ${name}`}
             onClick={open}
           >
+            {/* The card, behind the envelope, slides up out of it once the flap is open. */}
+            <span ref={peek} className="xmas-peek" aria-hidden="true" />
             <span className="xmas-turn">
               <span className="xmas-face xmas-front">
                 <span className="xmas-stamp">★</span>
@@ -147,12 +176,13 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
                 <span className="xmas-seal">★</span>
               </span>
             </span>
-            <span className="xmas-hint">Tap to open</span>
+            {stage === 'sealed' && <span className="xmas-hint">Tap to open</span>}
           </button>
         )}
 
-        {!envelope && (
+        {cardShown && (
           <section
+            ref={card}
             className="xmas-card"
             data-stage={stage}
             aria-label="Your Christmas card"

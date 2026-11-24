@@ -121,7 +121,10 @@
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  margin-bottom: 6vh;
+  position: absolute;
+  left: 50%;
+  bottom: calc(6vh + 64px + env(safe-area-inset-bottom, 0px));
+  translate: -50% 0;
   background: none;
   border: 0;
   cursor: pointer;
@@ -130,11 +133,38 @@
   text-shadow: 0 2px 8px #000a;
   perspective: 1100px;
 }
+.xmas-env[data-stage='folded'] {
+  opacity: 0;
+  transition: opacity 0.9s;
+}
+/* The card inside the envelope: it waits out of sight behind the back, then slides up above the envelope's top edge */
+.xmas-peek {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 10px;
+  aspect-ratio: 3 / 2;
+  border: 6px solid #fff;
+  border-radius: 4px;
+  background: url('/c/bg.webp') center 85% / cover no-repeat;
+  box-shadow: 0 6px 18px #0006;
+  z-index: 0;
+  visibility: hidden;
+  transition: transform 1.3s ease-in-out;
+}
+.xmas-env[data-stage='rising'] .xmas-peek {
+  visibility: visible;
+  transform: translateY(-62%);
+}
 .xmas-env:focus-visible {
   outline: 3px solid var(--glow);
   outline-offset: 6px;
 }
 .xmas-hint {
+  position: absolute;
+  top: 100%;
+  margin-top: 12px;
+  white-space: nowrap;
   font-size: 1.05rem;
 }
 .xmas-turn {
@@ -142,11 +172,11 @@
   display: block;
   width: min(320px, 82vw);
   aspect-ratio: 3 / 2;
+  z-index: 1;
   transform-style: preserve-3d;
   transition: transform 0.9s ease-in-out;
 }
-.xmas-env[data-stage='turning'] .xmas-turn,
-.xmas-env[data-stage='flap'] .xmas-turn {
+.xmas-env:not([data-stage='sealed']) .xmas-turn {
   transform: rotateY(180deg);
 }
 .xmas-face {
@@ -229,10 +259,10 @@
     transform: scale(1.12);
   }
 }
-.xmas-env[data-stage='flap'] .xmas-flap {
+.xmas-env:not([data-stage='sealed'], [data-stage='turning']) .xmas-flap {
   transform: rotateX(180deg);
 }
-.xmas-env[data-stage='flap'] .xmas-seal {
+.xmas-env:not([data-stage='sealed'], [data-stage='turning']) .xmas-seal {
   display: none;
 }
 
@@ -241,13 +271,6 @@
   position: relative;
   width: min(440px, 100%);
   perspective: 1500px;
-  animation: xmas-rise 0.9s ease-out;
-}
-@keyframes xmas-rise {
-  from {
-    opacity: 0;
-    transform: translateY(60px);
-  }
 }
 .xmas-sheet {
   background: var(--paper);
