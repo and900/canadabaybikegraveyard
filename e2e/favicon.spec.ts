@@ -1,9 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
 
-// The headstone's colours as a canvas reads them back: grey edge, grey face, green ground, and the cross in the
-// header's night slate. Then a clear pixel.
+// The bike's colours as a canvas reads them back: wheels, frame, and saddle and handlebar. Then a clear pixel.
 const NIGHT = '31,42,54,255'
-const HEADSTONE = ['154,165,177,255', '196,204,212,255', '60,154,58,255', NIGHT]
+const BIKE = ['139,149,161,255', '232,112,42,255', '107,118,131,255']
 const CLEAR = '0,0,0,0'
 
 /** The icons the page names, in order. */
@@ -40,7 +39,7 @@ const scale = (rows: string[][], factor: number): string[][] =>
 // Every page has them; the list's is the lightest.
 test.beforeEach(({ page }) => page.goto('/list'))
 
-test('names the headstone SVG for tabs, favicon.ico for older browsers, and the home-screen icon', async ({
+test('names the bike SVG for tabs, favicon.ico for older browsers, and the home-screen icon', async ({
   page,
   request,
 }) => {
@@ -57,7 +56,7 @@ test('names the headstone SVG for tabs, favicon.ico for older browsers, and the 
   }
 })
 
-test("draws the header's headstone in the tab", async ({ page }) => {
+test("draws the header's bike in the tab", async ({ page }) => {
   const [, svg] = await icons(page)
   // Every shape in each drawing: its kind, colour and outline.
   const [icon, header] = await page.evaluate(async (href) => {
@@ -66,15 +65,15 @@ test("draws the header's headstone in the tab", async ({ page }) => {
       [...svg.children].map((shape) => [shape.localName, shape.getAttribute('fill'), shape.getAttribute('d')]),
     )
   }, svg!.href)
-  expect(icon).toHaveLength(4)
+  expect(icon).toHaveLength(3)
   expect(icon).toEqual(header)
 })
 
 test('draws every icon in whole pixels of the 16 px tab icon', async ({ page }) => {
   const [ico, svg, apple] = await icons(page)
   const tab = await draw(page, svg!.href, 16)
-  // Only the headstone's colours and clear: no blended edges.
-  expect(new Set(tab.flat())).toEqual(new Set([...HEADSTONE, CLEAR]))
+  // Only the bike's colours and clear: no blended edges.
+  expect(new Set(tab.flat())).toEqual(new Set([...BIKE, CLEAR]))
   // Each pixel twice the size on a 2× screen, and in favicon.ico.
   expect(await draw(page, svg!.href, 32)).toEqual(scale(tab, 2))
   expect(await draw(page, ico!.href, 32)).toEqual(scale(tab, 2))

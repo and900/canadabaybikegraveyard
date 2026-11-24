@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import '../card.css'
 
-export const metadata: Metadata = { title: 'This card isn’t here', robots: { index: false } }
+export const metadata: Metadata = { title: { absolute: 'This card isn’t here' }, robots: { index: false } }
 
 export default function CardNotFound() {
   return (

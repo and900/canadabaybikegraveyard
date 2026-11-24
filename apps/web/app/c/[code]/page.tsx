@@ -9,7 +9,7 @@ type Props = { params: Promise<{ code: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const card = await cardByCode((await params).code)
   return {
-    title: card ? `A Christmas card for ${card.name}` : 'Christmas card',
+    title: { absolute: card ? `A Christmas card for ${card.name}` : 'Christmas card' },
     description: 'Tap the envelope to open your Christmas card.',
     // Only the people sent the link need it: it stays out of search results.
     robots: { index: false, follow: false },

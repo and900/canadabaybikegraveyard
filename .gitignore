@@ -14,6 +14,8 @@ apps/web/public/tiles/
 apps/web/public/preview.webp
 apps/web/app/apple-icon.png
 apps/web/app/favicon.ico
+apps/web/app/c/apple-icon.png
+apps/web/app/c/favicon.ico
 # Photos stored without a Blob token: local development and tests.
 .data/
 # Written by next dev for coding agents.
