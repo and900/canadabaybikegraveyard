@@ -19,6 +19,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         : 'Tap then tap the envelope to open your Christmas card',
       type: 'website',
     },
+    // The star, named outright: the site's /favicon.ico is the bike, and a browser may pick that over the star's SVG.
+    icons: {
+      icon: [
+        { url: '/c/star.ico', sizes: '32x32', type: 'image/x-icon' },
+        { url: '/c/icon.svg', type: 'image/svg+xml' },
+      ],
+      apple: [{ url: '/c/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+    },
     // Only the people sent the link need it: it stays out of search results.
     robots: { index: false, follow: false },
   }

@@ -9,6 +9,14 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: { default: 'Canada Bay Community Watch', template: '%s · Canada Bay Community Watch' },
+  // The bike's icons, named here rather than found as files, which every page, the cards' too, would list.
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 }
 
 export const viewport: Viewport = { viewportFit: 'cover' }

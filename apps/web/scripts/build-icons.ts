@@ -5,7 +5,12 @@ import { readFile, writeFile } from 'node:fs/promises'
 import sharp from 'sharp'
 
 // The bike for the whole site, and the star for the Christmas cards under /c.
-for (const app of [new URL('../app/', import.meta.url), new URL('../app/c/', import.meta.url)]) {
+// Each .ico lives in public/ and is named by page metadata (the site's in the root layout, the cards' in the card page), so
+// a card page never also lists the site's.
+for (const [app, ico] of [
+  [new URL('../app/', import.meta.url), new URL('../public/favicon.ico', import.meta.url)],
+  [new URL('../app/c/', import.meta.url), new URL('../public/c/star.ico', import.meta.url)],
+] as const) {
   const icon = await sharp(await readFile(new URL('icon.svg', app)))
     .png()
     .toBuffer()
@@ -32,6 +37,6 @@ for (const app of [new URL('../app/', import.meta.url), new URL('../app/c/', imp
   header.writeUInt16LE(32, 12) // 32 bits a pixel,
   header.writeUInt32LE(png.length, 14) // this many bytes long,
   header.writeUInt32LE(header.length, 18) // straight after the header.
-  await writeFile(new URL('favicon.ico', app), Buffer.concat([header, png]))
+  await writeFile(ico, Buffer.concat([header, png]))
 }
 console.info('apple-icon.png (180 × 180) and favicon.ico (32 × 32) drawn for the site and the cards')
