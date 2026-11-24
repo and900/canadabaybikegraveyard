@@ -93,7 +93,7 @@ export async function cardByCode(code: string): Promise<CardView | null> {
     SELECT r.name, r.greeting, COALESCE(r.message, s.message) AS message, s.signoff, s.theme
     FROM card_recipients r, card_settings s
     WHERE r.code = ${code} AND s.id = 1`
-  return row && { ...row, theme: isCardTheme(row.theme) ? row.theme : 'midnight' }
+  return row ? { ...row, theme: isCardTheme(row.theme) ? row.theme : 'midnight' } : null
 }
 
 /** Notes the first time a card's envelope is opened. False when no one has the code. */
