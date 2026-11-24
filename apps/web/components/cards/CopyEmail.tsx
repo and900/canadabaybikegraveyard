@@ -6,7 +6,7 @@ const escape = (text: string) =>
 
 /**
  * Copies a card as an email to paste into Outlook.com or Gmail: a line of greeting, the card's picture as a clickable
- * link, a button, and the plain link for mail that holds pictures back until the reader allows them.
+ * link, and a button.
  */
 export function CopyEmail({ url, imageUrl, name }: { url: string; imageUrl: string; name: string }) {
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle')
@@ -14,8 +14,7 @@ export function CopyEmail({ url, imageUrl, name }: { url: string; imageUrl: stri
     const link = escape(url)
     const html = `<p style="font-size:18px">Merry Christmas, ${escape(name)}!</p>
 <p><a href="${link}"><img src="${escape(imageUrl)}" width="560" alt="A Christmas card for ${escape(name)}" style="max-width:100%;border-radius:8px"></a></p>
-<p><a href="${link}" style="display:inline-block;background:#c8312f;color:#ffffff;font-weight:bold;font-size:18px;text-decoration:none;padding:12px 22px;border-radius:8px">Open your Christmas card</a></p>
-<p style="color:#555">Or open it here: <a href="${link}">${link}</a></p>`
+<p><a href="${link}" style="display:inline-block;background:#c8312f;color:#ffffff;font-weight:bold;font-size:18px;text-decoration:none;padding:12px 22px;border-radius:8px">Open your Christmas card</a></p>`
     const text = `Merry Christmas, ${name}!\nOpen your Christmas card: ${url}`
     try {
       await navigator.clipboard.write([
