@@ -2,6 +2,7 @@ import { CARD_LIMITS, CARD_THEMES, cardUrl } from '@iwb/shared'
 import { getCardSettings, listRecipients } from '@iwb/server'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
+import { CopyEmail } from '@/components/cards/CopyEmail'
 import { CopyLink } from '@/components/cards/CopyLink'
 import { adminOpen, signedIn } from '@/lib/cards-admin'
 
@@ -137,6 +138,7 @@ export default async function CardsAdmin({ searchParams }: { searchParams: Promi
                 <p className="mt-1 text-sm break-all">{url}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <CopyLink url={url} />
+                  <CopyEmail url={url} imageUrl={`${origin}/c/${person.code}/opengraph-image`} name={person.name} />
                   <a
                     href={`https://wa.me/?text=${encodeURIComponent(url)}`}
                     className="inline-flex min-h-11 items-center rounded-[10px] border border-edge px-3 font-bold"
