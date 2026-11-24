@@ -117,6 +117,7 @@
 
 /* Envelope: its front is addressed; a tap turns it over, and the flap opens */
 .xmas-env {
+  --ew: min(320px, 82vw);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -133,9 +134,32 @@
   text-shadow: 0 2px 8px #000a;
   perspective: 1100px;
 }
-.xmas-env[data-stage='folded'] {
-  opacity: 0;
-  transition: opacity 0.9s;
+/* The envelope sinks slowly while the card rises, then drifts off to the lower right once the card has left it */
+.xmas-env[data-stage='rising'] {
+  transform: translateY(50px);
+  transition: transform 3s linear;
+}
+.xmas-env[data-stage='leaving'],
+.xmas-env[data-stage='open'] {
+  transform: translate(75vw, 70vh);
+  transition: transform 3.6s ease-in;
+}
+/* The flap, standing open above the envelope and behind the card */
+.xmas-flap-up {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 55%;
+  z-index: -1;
+  background: var(--edge);
+  clip-path: polygon(0 100%, 100% 100%, 50% 0);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.8s ease-out;
+}
+.xmas-env:not([data-stage='sealed'], [data-stage='turning']) .xmas-flap-up {
+  transform: scaleY(1);
 }
 /* The card inside the envelope: it waits out of sight behind the back, then slides up above the envelope's top edge */
 .xmas-peek {
@@ -150,11 +174,12 @@
   box-shadow: 0 6px 18px #0006;
   z-index: 0;
   visibility: hidden;
-  transition: transform 1.3s ease-in-out;
+  transition: transform 2.8s ease-in-out;
 }
+/* Up by the envelope's height, and a tenth of the card's own more, so it is clear of the envelope */
 .xmas-env[data-stage='rising'] .xmas-peek {
   visibility: visible;
-  transform: translateY(-62%);
+  transform: translateY(calc(var(--ew) * -0.73 + 10px));
 }
 .xmas-env:focus-visible {
   outline: 3px solid var(--glow);
@@ -170,7 +195,7 @@
 .xmas-turn {
   position: relative;
   display: block;
-  width: min(320px, 82vw);
+  width: var(--ew);
   aspect-ratio: 3 / 2;
   z-index: 1;
   transform-style: preserve-3d;
