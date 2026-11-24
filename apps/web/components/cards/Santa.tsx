@@ -91,8 +91,8 @@ export function Santa({ name, run }: { name: string; run: boolean }) {
           </div>
         </div>
         <div className="xmas-tow">
-          <i className="xmas-rope" />
           <span>Merry Christmas, {name}!</span>
+          <i className="xmas-rope" />
         </div>
       </div>
     </div>
