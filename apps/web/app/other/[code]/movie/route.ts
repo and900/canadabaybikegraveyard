@@ -22,7 +22,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cod
       cache: 'no-store',
       redirect: 'error',
     })
-    if (!upstream.ok || !upstream.body) throw new Error('Storage unavailable')
+    if (!upstream.ok || !upstream.body) throw new Error(`Storage unavailable (HTTP ${upstream.status})`)
     return new NextResponse(upstream.body, {
       headers: {
         ...headers,
@@ -32,7 +32,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cod
           "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; connect-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
       },
     })
-  } catch {
+  } catch (error) {
+    // Which step failed, for Vercel's logs. Never the settings themselves.
+    console.error(`other card %s: %s`, 'movie', error instanceof Error ? error.message : 'unknown')
     return new NextResponse('Card temporarily unavailable', { status: 503, headers })
   }
 }

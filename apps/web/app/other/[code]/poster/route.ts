@@ -23,9 +23,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cod
       cache: 'no-store',
       redirect: 'error',
     })
-    if (!upstream.ok || !upstream.body) throw new Error('Storage unavailable')
+    if (!upstream.ok || !upstream.body) throw new Error(`Storage unavailable (HTTP ${upstream.status})`)
     return new NextResponse(upstream.body, { headers: { ...headers, 'Content-Type': 'image/jpeg' } })
-  } catch {
+  } catch (error) {
+    // Which step failed, for Vercel's logs. Never the settings themselves.
+    console.error(`other card %s: %s`, 'poster', error instanceof Error ? error.message : 'unknown')
     return new NextResponse('Poster unavailable', { status: 503, headers })
   }
 }
