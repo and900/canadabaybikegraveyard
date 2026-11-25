@@ -36,20 +36,24 @@ export const MELODY: [string, number][] = [
 ]
 
 /** How loud the bells are: soft enough to sit under the card. */
-const VOLUME = 0.5
+const VOLUME = 0.6
 
 let context: AudioContext | undefined
 let master: GainNode | undefined
 let started = false
 let timer: ReturnType<typeof setTimeout> | undefined
 
-/** One bell: the note, a quieter octave above it and a faint high shimmer, each ringing out. */
+/**
+ * One bell: the note, then higher partials that are quieter and die away sooner. Phone speakers give out little below
+ * 400 Hz, so the partials are what make it audible there.
+ */
 function playBell(frequency: number, start: number, seconds: number) {
   if (!context || !master) return
   for (const [multiple, level, ring] of [
-    [1, 0.12, 1.6],
-    [2, 0.04, 1.1],
-    [4.1, 0.012, 0.6],
+    [1, 0.3, 1.6],
+    [2, 0.14, 1.2],
+    [3, 0.08, 0.9],
+    [4.1, 0.03, 0.6],
   ] as const) {
     const oscillator = context.createOscillator()
     const gain = context.createGain()
@@ -86,6 +90,9 @@ export async function startChristmasMusic() {
     window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
   if (!Context) return
   try {
+    // An iPhone keeps web audio silent while its ring/silent switch is on, unless the page says it is playing media.
+    const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession
+    if (session) session.type = 'playback'
     context ??= new Context()
     if (!master) {
       master = context.createGain()
@@ -94,7 +101,7 @@ export async function startChristmasMusic() {
     }
     await context.resume()
     // A tap that didn't count as one (some browsers) leaves it suspended: wait for the next.
-    if (context.state !== 'running') return
+    if (context?.state !== 'running' || started) return
     started = true
     playMelody()
   } catch {
