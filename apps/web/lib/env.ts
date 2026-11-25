@@ -14,3 +14,18 @@ export function cronSecret() {
 export function cardsAdminPassword() {
   return process.env.CARDS_ADMIN_PASSWORD ?? (onVercel ? '' : 'dev-cards-password')
 }
+
+/** The secret in the private /other/ card's link. Unset, that card stays closed. */
+export function ollieCardCode() {
+  return process.env.OLLIE_CARD_CODE
+}
+
+/** Where the private card's page is kept in private Vercel Blob storage. Unset, the card isn't ready. */
+export function ollieMovieUrl() {
+  return process.env.OLLIE_PRIVATE_MOVIE_URL
+}
+
+/** The token that reads private Vercel Blob storage. */
+export function blobReadWriteToken() {
+  return process.env.BLOB_READ_WRITE_TOKEN
+}
