@@ -89,6 +89,11 @@ export function nameFromSlug(slug: string): string | null {
   return name
 }
 
+/** The words on every open card: the same for everyone, signed with whoever it is from. */
+export const OPEN_MESSAGE =
+  'Merry Christmas and a Happy New Year!\n\nWishing you a wonderful festive season and a happy, healthy and prosperous New Year.'
+export const openSignoff = (from: string) => `Best wishes, ${from}`
+
 /** The scenes an open card can be made in. The first is the original, and what a link without a style gets. */
 export const CARD_STYLES = ['traditional', 'aussie', 'beach'] as const
 export type CardStyle = (typeof CARD_STYLES)[number]

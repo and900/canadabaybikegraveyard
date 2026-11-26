@@ -1,5 +1,5 @@
 import { getCardSettings } from '@iwb/server'
-import { cardStyle, nameFromSlug } from '@iwb/shared'
+import { cardStyle, nameFromSlug, OPEN_MESSAGE, openSignoff } from '@iwb/shared'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { CardView } from '@/components/cards/CardView'
@@ -41,12 +41,12 @@ export default async function OpenCard({ params, searchParams }: Props) {
   const settings = await getCardSettings()
   // Who it is from, when the link says: otherwise the sign-off the card's maker set.
   const from = nameFromSlug((await searchParams).from ?? '')
-  const signoff = from ? `With love, ${from}` : settings.signoff
+  const signoff = from ? openSignoff(from) : settings.signoff
   return (
     <CardView
       name={name}
       greeting={null}
-      message={settings.message}
+      message={OPEN_MESSAGE}
       signoff={signoff}
       theme={settings.theme}
       style={cardStyle((await searchParams).style)}
