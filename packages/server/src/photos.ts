@@ -228,12 +228,17 @@ export const deleteExpiredPhotos = () =>
     return expired.map((photo) => photo.id)
   }, 'expired')
 
+/** Folders in the store that aren't photos, which the sweep must never delete from. */
+const KEPT_FOLDERS = ['other-cards']
+
 /**
  * Hourly step 2 (§5.4): files no photo has. A deleted photo's go at once: a failed deletion left them (assumption 16).
- * A file with no row at all, a failed attach's, waits an hour, as its row may still be being written.
+ * A file with no row at all, a failed attach's, waits an hour, as its row may still be being written. Files in
+ * KEPT_FOLDERS are left alone.
  */
 export async function sweepOrphanFiles() {
-  const files = await listFiles()
+  // Only the photos' own files: the store also holds other things, such as the private cards, that no photo row names.
+  const files = (await listFiles()).filter((file) => !KEPT_FOLDERS.some((folder) => file.path.split('/')[0] === folder))
   const orphans = await db.$queryRaw<{ path: string }[]>`
     SELECT path FROM unnest(${files.map((file) => file.path)}::text[],
                             ${files.map((file) => file.uploadedAt)}::timestamptz[]) AS file (path, uploaded_at)

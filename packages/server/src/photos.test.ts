@@ -5,7 +5,15 @@ import { deleteFiles, listFiles, putFile } from './blob'
 import { db } from './client'
 import { env } from './env'
 import { countAction } from './limits'
-import { attachPhoto, deleteExpiredPhotos, type NewPhoto, openAnyPhoto, openPhoto, uploadsPaused } from './photos'
+import {
+  attachPhoto,
+  deleteExpiredPhotos,
+  type NewPhoto,
+  openAnyPhoto,
+  openPhoto,
+  sweepOrphanFiles,
+  uploadsPaused,
+} from './photos'
 import { takeDown } from './moderation'
 import { getLiveTag, getTag, listLiveTags, undoRemoval } from './tags'
 import type { Visitor } from './visitors'
@@ -13,7 +21,12 @@ import type { Visitor } from './visitors'
 // The real seam on the tests' own folder, watched, so a test can make it fail once.
 vi.mock('./blob', async (importOriginal) => {
   const blob = await importOriginal<typeof import('./blob')>()
-  return { ...blob, putFile: vi.fn(blob.putFile), deleteFiles: vi.fn(blob.deleteFiles) }
+  return {
+    ...blob,
+    putFile: vi.fn(blob.putFile),
+    deleteFiles: vi.fn(blob.deleteFiles),
+    listFiles: vi.fn(blob.listFiles),
+  }
 })
 // The real read, watched, so a test can act while an attach's transaction is still open.
 vi.mock('./tags', async (importOriginal) => {
@@ -245,6 +258,20 @@ describe('deleteExpiredPhotos', () => {
     expect(await cleaning).toBe(0)
     expect(await statuses()).toEqual([{ status: 'visible' }])
     expect(await files()).toHaveLength(2)
+  })
+})
+
+describe('sweepOrphanFiles', () => {
+  it('deletes a stray photo file but never the files in the other-cards folder', async () => {
+    const old = new Date(Date.now() - 2 * 60 * 60 * 1000)
+    vi.mocked(listFiles).mockResolvedValueOnce([
+      { path: 'other-cards/ollie-message-preview.jpg', uploadedAt: old },
+      { path: 'other-cards/movie.mp4', uploadedAt: old },
+      { path: 'stray.webp', uploadedAt: old },
+    ])
+    vi.mocked(deleteFiles).mockClear()
+    expect(await sweepOrphanFiles()).toBe(1)
+    expect(deleteFiles).toHaveBeenCalledWith(['stray.webp'])
   })
 })
 
