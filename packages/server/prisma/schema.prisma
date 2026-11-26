@@ -197,3 +197,15 @@ model CardRecipient {
 
   @@map("card_recipients")
 }
+
+/// How many open cards were made (the link copied) and opened, by design and day. Counts only.
+model CardCount {
+  day   DateTime @db.Date
+  style String
+  /// 'made' or 'opened'.
+  event String
+  count Int      @default(0)
+
+  @@id([day, style, event])
+  @@map("card_counts")
+}

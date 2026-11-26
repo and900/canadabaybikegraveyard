@@ -4,6 +4,9 @@ import {
   addRecipients,
   allowLoginTry,
   cardByCode,
+  cardCounts,
+  cardCountsByDay,
+  countCardEvent,
   deleteRecipient,
   getCardSettings,
   listRecipients,
@@ -14,6 +17,7 @@ import {
 
 beforeEach(async () => {
   await db.$executeRaw`DELETE FROM card_recipients`
+  await db.$executeRaw`DELETE FROM card_counts`
   await db.$executeRaw`DELETE FROM rate_counters WHERE key LIKE 'cards-login:%'`
   await saveCardSettings({ message: 'Merry Christmas', signoff: 'With love, A', theme: 'midnight' })
 })
@@ -93,3 +97,18 @@ describe('allowLoginTry', () => {
 async function find(name: string) {
   return (await listRecipients()).find((r) => r.name === name)!
 }
+
+describe('open card counts', () => {
+  it('counts made and opened cards by design', async () => {
+    await countCardEvent('made', 'aussie')
+    await countCardEvent('made', 'aussie')
+    await countCardEvent('opened', 'aussie')
+    await countCardEvent('made', 'beach')
+    expect(await cardCounts(['traditional', 'aussie', 'beach'])).toEqual([
+      { style: 'traditional', made: 0, opened: 0 },
+      { style: 'aussie', made: 2, opened: 1 },
+      { style: 'beach', made: 1, opened: 0 },
+    ])
+    expect(await cardCountsByDay(7)).toEqual([expect.objectContaining({ made: 3, opened: 1 })])
+  })
+})

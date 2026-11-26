@@ -109,3 +109,8 @@ export const openCardUrl = (origin: string, name: string, from?: string, style?:
   if (style && style !== 'traditional') query.set('style', style)
   return query.size ? `${base}?${query}` : base
 }
+
+/** What is counted about open cards: a link copied to send, and a card's envelope opened. */
+export const CARD_EVENTS = ['made', 'opened'] as const
+export type CardEvent = (typeof CARD_EVENTS)[number]
+export const isCardEvent = (value: unknown): value is CardEvent => CARD_EVENTS.includes(value as CardEvent)

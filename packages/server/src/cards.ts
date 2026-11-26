@@ -2,6 +2,9 @@
 import { randomInt } from 'node:crypto'
 import {
   CARD_LIMITS,
+  type CardEvent,
+  type CardStyle,
+  cardStyle,
   type CardTheme,
   cleanText,
   isCardCode,
@@ -116,4 +119,42 @@ export async function allowLoginTry(who: string) {
     ON CONFLICT (key) DO UPDATE SET count = rate_counters.count + 1
     RETURNING count`
   return counter!.count <= 10
+}
+
+/** Adds one to today's (Sydney's) count of an open-card event for a design. */
+export async function countCardEvent(event: CardEvent, style: CardStyle) {
+  await db.$executeRaw`
+    INSERT INTO card_counts (day, style, event, count)
+    VALUES ((now() AT TIME ZONE 'Australia/Sydney')::date, ${style}, ${event}, 1)
+    ON CONFLICT (day, style, event) DO UPDATE SET count = card_counts.count + 1`
+}
+
+export type CardCounts = { style: CardStyle; made: number; opened: number }[]
+
+/** Totals so far for each design, in the order they are offered. */
+export async function cardCounts(styles: readonly CardStyle[]): Promise<CardCounts> {
+  const rows = await db.$queryRaw<{ style: string; event: string; total: bigint }[]>`
+    SELECT style, event, sum(count) AS total FROM card_counts GROUP BY style, event`
+  const total = (style: string, event: CardEvent) =>
+    Number(rows.find((r) => r.style === style && r.event === event)?.total ?? 0)
+  return styles.map((style) => ({
+    style: cardStyle(style),
+    made: total(style, 'made'),
+    opened: total(style, 'opened'),
+  }))
+}
+
+/** The last `days` days' counts, newest first, for the admin page. */
+export async function cardCountsByDay(days: number) {
+  const rows = await db.$queryRaw<{ day: string; event: string; total: bigint }[]>`
+    SELECT to_char(day, 'YYYY-MM-DD') AS day, event, sum(count) AS total
+    FROM card_counts WHERE day > (now() AT TIME ZONE 'Australia/Sydney')::date - ${days}::int
+    GROUP BY day, event ORDER BY day DESC`
+  const byDay = new Map<string, { day: string; made: number; opened: number }>()
+  for (const r of rows) {
+    const entry = byDay.get(r.day) ?? { day: r.day, made: 0, opened: 0 }
+    entry[r.event === 'made' ? 'made' : 'opened'] = Number(r.total)
+    byDay.set(r.day, entry)
+  }
+  return [...byDay.values()]
 }

@@ -125,6 +125,13 @@ export function CardView({ code, name, greeting, message, signoff, theme, style 
     if (stage !== 'sealed') return
     setStage('turning')
     if (code) void fetch(`/api/c/${code}/open`, { method: 'POST', keepalive: true }).catch(() => {})
+    // An open card has no recipient to mark, so it is only counted, by design.
+    else
+      void fetch('/api/c/count', {
+        method: 'POST',
+        body: JSON.stringify({ event: 'opened', style: style ?? 'traditional' }),
+        keepalive: true,
+      }).catch(() => {})
     const later = (ms: number, run: () => void) => timers.current.push(setTimeout(run, ms))
     // A slow dance: the flap opens; the card rises until it is clear of the envelope (and a little more) while the
     // envelope sinks; then the card descends to its place while the envelope drifts off to the lower right, its flap the

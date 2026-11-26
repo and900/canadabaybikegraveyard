@@ -1,5 +1,5 @@
-import { CARD_LIMITS, CARD_THEMES, cardUrl } from '@iwb/shared'
-import { getCardSettings, listRecipients } from '@iwb/server'
+import { CARD_LIMITS, CARD_STYLES, CARD_THEMES, cardUrl } from '@iwb/shared'
+import { cardCounts, cardCountsByDay, getCardSettings, listRecipients } from '@iwb/server'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { CopyEmail } from '@/components/cards/CopyEmail'
@@ -47,7 +47,12 @@ export default async function CardsAdmin({ searchParams }: { searchParams: Promi
       </form>,
     )
 
-  const [settings, recipients] = await Promise.all([getCardSettings(), listRecipients()])
+  const [settings, recipients, counts, days] = await Promise.all([
+    getCardSettings(),
+    listRecipients(),
+    cardCounts(CARD_STYLES),
+    cardCountsByDay(14),
+  ])
   const host = (await headers()).get('host') ?? 'localhost:3000'
   const origin = `${/^localhost/.test(host) ? 'http' : 'https'}://${host}`
   const opened = recipients.filter((r) => r.openedAt).length
@@ -57,6 +62,43 @@ export default async function CardsAdmin({ searchParams }: { searchParams: Promi
       <form method="post" action="/cards-admin/api/logout" className="mt-1">
         <button className="underline">Sign out</button>
       </form>
+
+      <section className="mt-6" aria-labelledby="count-h">
+        <h2 id="count-h" className="text-lg font-bold">
+          Open cards (from /c/new)
+        </h2>
+        <p className="text-muted">
+          Made = link copied to send. Opened = envelope tapped. Counts only; no names are kept.
+        </p>
+        <table className="mt-2 w-full text-left">
+          <thead>
+            <tr>
+              <th>Design</th>
+              <th>Made</th>
+              <th>Opened</th>
+            </tr>
+          </thead>
+          <tbody>
+            {counts.map((row) => (
+              <tr key={row.style}>
+                <td className="capitalize">{row.style}</td>
+                <td>{row.made}</td>
+                <td>{row.opened}</td>
+              </tr>
+            ))}
+            <tr className="font-bold">
+              <td>All</td>
+              <td>{counts.reduce((sum, row) => sum + row.made, 0)}</td>
+              <td>{counts.reduce((sum, row) => sum + row.opened, 0)}</td>
+            </tr>
+          </tbody>
+        </table>
+        {days.length > 0 && (
+          <p className="mt-2 text-muted">
+            By day: {days.map((d) => `${d.day.slice(5)} made ${d.made}, opened ${d.opened}`).join(' · ')}
+          </p>
+        )}
+      </section>
 
       <section className="mt-6" aria-labelledby="card-h">
         <h2 id="card-h" className="text-lg font-bold">

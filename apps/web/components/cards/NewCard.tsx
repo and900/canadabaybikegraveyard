@@ -35,6 +35,11 @@ export function NewCard() {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(message)
+      void fetch('/api/c/count', {
+        method: 'POST',
+        body: JSON.stringify({ event: 'made', style }),
+        keepalive: true,
+      }).catch(() => {})
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
