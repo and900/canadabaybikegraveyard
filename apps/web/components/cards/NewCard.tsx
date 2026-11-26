@@ -2,61 +2,94 @@
 import { nameFromSlug, OPEN_NAME_MAX, openCardUrl } from '@iwb/shared'
 import { useState } from 'react'
 
-/** Type a name, get the card's link. Nothing is saved: the name is the link. */
+const field = {
+  font: 'inherit',
+  padding: '10px 12px',
+  width: '100%',
+  maxWidth: 360,
+  borderRadius: 8,
+  color: '#222',
+  border: '1px solid #b9b0a0',
+} as const
+const button = {
+  font: 'inherit',
+  padding: '10px 22px',
+  borderRadius: 8,
+  background: '#c8312f',
+  color: '#fff',
+  border: 0,
+} as const
+
+/** Type who it is for and who it is from, get the link and a message to send. Nothing is saved: the names are the link. */
 export function NewCard() {
-  const [name, setName] = useState('')
-  const [copied, setCopied] = useState(false)
-  const clean = nameFromSlug(name.trim().replace(/\s+/g, '-'))
-  const url = clean ? openCardUrl(location.origin, clean) : ''
-  const copy = async () => {
+  const [to, setTo] = useState('')
+  const [from, setFrom] = useState('')
+  const [copied, setCopied] = useState<'link' | 'message' | null>(null)
+  const toName = nameFromSlug(to.trim().replace(/\s+/g, '-'))
+  const fromName = nameFromSlug(from.trim().replace(/\s+/g, '-'))
+  const url = toName && fromName ? openCardUrl(location.origin, toName, fromName) : ''
+  const message = url ? `Merry Christmas, ${toName}! I made you a Christmas card. Open it here: ${url}` : ''
+  const copy = async (kind: 'link' | 'message', text: string) => {
     try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(text)
+      setCopied(kind)
+      setTimeout(() => setCopied(null), 2000)
     } catch {
-      // The link is on screen to copy by hand.
+      // The text is on screen to copy by hand.
     }
   }
+  const bad = (value: string, clean: string | null) => value.trim() && !clean
   return (
     <section className="xmas-sheet" style={{ textAlign: 'center' }}>
       <h1 style={{ fontSize: '2.2rem', color: 'var(--accent)' }}>Make a Christmas card</h1>
-      <p style={{ fontSize: '1.1rem', lineHeight: 1.5 }}>Type who it is for, then copy the link and send it.</p>
+      <p style={{ fontSize: '1.1rem', lineHeight: 1.5 }}>Type who it is for and who it is from, then copy the link.</p>
       <label style={{ display: 'block', margin: '1rem 0' }}>
-        <span style={{ display: 'block', marginBottom: 6 }}>Name</span>
+        <span style={{ display: 'block', marginBottom: 6 }}>To</span>
         <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
+          value={to}
+          onChange={(e) => setTo(e.target.value)}
           maxLength={OPEN_NAME_MAX}
           placeholder="Tom and Hillary"
-          style={{
-            font: 'inherit',
-            padding: '10px 12px',
-            width: '100%',
-            maxWidth: 360,
-            borderRadius: 8,
-            color: '#222',
-          }}
+          style={field}
         />
       </label>
-      {name.trim() && !clean && <p>Letters and spaces only, please, up to {OPEN_NAME_MAX} of them.</p>}
-      {clean && (
+      <label style={{ display: 'block', margin: '1rem 0' }}>
+        <span style={{ display: 'block', marginBottom: 6 }}>From</span>
+        <input
+          value={from}
+          onChange={(e) => setFrom(e.target.value)}
+          maxLength={OPEN_NAME_MAX}
+          placeholder="Sam and Jo"
+          style={field}
+        />
+      </label>
+      {(bad(to, toName) || bad(from, fromName)) && (
+        <p>Letters and spaces only, please, up to {OPEN_NAME_MAX} of them.</p>
+      )}
+      {url && (
         <>
           <p style={{ wordBreak: 'break-all', fontSize: '0.95rem' }}>
             <a href={url}>{url}</a>
           </p>
-          <button
-            type="button"
-            onClick={copy}
+          <button type="button" onClick={() => copy('link', url)} style={button}>
+            {copied === 'link' ? 'Copied!' : 'Copy link'}
+          </button>
+          <p style={{ marginTop: '1.4rem' }}>Or paste this into an email or message:</p>
+          <p
             style={{
-              font: 'inherit',
-              padding: '10px 22px',
+              wordBreak: 'break-word',
+              fontSize: '0.95rem',
+              textAlign: 'left',
+              background: '#fff',
+              color: '#222',
+              padding: 12,
               borderRadius: 8,
-              background: '#c8312f',
-              color: '#fff',
-              border: 0,
             }}
           >
-            {copied ? 'Copied!' : 'Copy link'}
+            {message}
+          </p>
+          <button type="button" onClick={() => copy('message', message)} style={button}>
+            {copied === 'message' ? 'Copied!' : 'Copy message'}
           </button>
         </>
       )}

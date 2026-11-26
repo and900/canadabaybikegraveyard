@@ -89,6 +89,9 @@ export function nameFromSlug(slug: string): string | null {
   return name
 }
 
-/** The link for an open card: spaces become dashes. */
-export const openCardUrl = (origin: string, name: string) =>
-  `${origin}/c/to/${encodeURIComponent(name.trim().replace(/\s+/g, '-'))}`
+/** The link for an open card: spaces become dashes, and who it is from rides along as `?from=`. */
+export const openCardUrl = (origin: string, name: string, from?: string) => {
+  const base = `${origin}/c/to/${encodeURIComponent(name.trim().replace(/\s+/g, '-'))}`
+  const sender = from?.trim().replace(/\s+/g, '-')
+  return sender ? `${base}?from=${encodeURIComponent(sender)}` : base
+}

@@ -27,4 +27,7 @@ describe('openCardUrl', () => {
     expect(url).toBe('https://x.test/c/to/Tom-and-Hillary')
     expect(nameFromSlug(url.split('/').pop()!)).toBe('Tom and Hillary')
   })
+  it('carries who it is from', () => {
+    expect(openCardUrl('https://x.test', 'Nan', 'Sam and Jo')).toBe('https://x.test/c/to/Nan?from=Sam-and-Jo')
+  })
 })

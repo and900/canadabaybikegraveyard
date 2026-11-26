@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 import { CardView } from '@/components/cards/CardView'
 import '../../card.css'
 
-type Props = { params: Promise<{ name: string }> }
+type Props = { params: Promise<{ name: string }>; searchParams: Promise<{ from?: string }> }
 
 /** A card made by the link itself: the name is in the address, so nothing is stored. */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -31,9 +31,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function OpenCard({ params }: Props) {
+export default async function OpenCard({ params, searchParams }: Props) {
   const name = nameFromSlug((await params).name)
   if (!name) notFound()
-  const { message, signoff, theme } = await getCardSettings()
-  return <CardView name={name} greeting={null} message={message} signoff={signoff} theme={theme} />
+  const settings = await getCardSettings()
+  // Who it is from, when the link says: otherwise the sign-off the card's maker set.
+  const from = nameFromSlug((await searchParams).from ?? '')
+  const signoff = from ? `With love, ${from}` : settings.signoff
+  return <CardView name={name} greeting={null} message={settings.message} signoff={signoff} theme={settings.theme} />
 }
