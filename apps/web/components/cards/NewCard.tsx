@@ -5,8 +5,8 @@ import { useState } from 'react'
 const field = {
   font: 'inherit',
   padding: '10px 12px',
-  width: '100%',
-  maxWidth: 360,
+  flex: 1,
+  minWidth: 0,
   borderRadius: 8,
   color: '#222',
   border: '1px solid #b9b0a0',
@@ -49,12 +49,8 @@ export function NewCard() {
   const bad = (value: string, clean: string | null) => value.trim() && !clean
   return (
     <section className="xmas-sheet" style={{ textAlign: 'center' }}>
-      <h1 style={{ fontSize: '2.2rem', color: 'var(--accent)' }}>Make a Christmas card</h1>
-      <p style={{ fontSize: '1.1rem', lineHeight: 1.5 }}>
-        Choose a design, then type who it is for and who it is from.
-      </p>
-      <div style={{ margin: '1rem 0' }}>
-        <span style={{ display: 'block', marginBottom: 6 }}>Pick a design</span>
+      <h1 style={{ fontSize: '1.8rem', lineHeight: 1.1, color: 'var(--accent)' }}>Make a Christmas card</h1>
+      <div style={{ margin: '0.6rem 0' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
           {CARD_STYLES.map((option) => (
             <button
@@ -88,8 +84,8 @@ export function NewCard() {
           ))}
         </div>
       </div>
-      <label style={{ display: 'block', margin: '1rem 0' }}>
-        <span style={{ display: 'block', marginBottom: 6 }}>To</span>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '0.6rem 0' }}>
+        <span style={{ width: 52, textAlign: 'right' }}>To</span>
         <input
           value={to}
           onChange={(e) => setTo(e.target.value)}
@@ -98,8 +94,8 @@ export function NewCard() {
           style={field}
         />
       </label>
-      <label style={{ display: 'block', margin: '1rem 0' }}>
-        <span style={{ display: 'block', marginBottom: 6 }}>From</span>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '0.6rem 0' }}>
+        <span style={{ width: 52, textAlign: 'right' }}>From</span>
         <input
           value={from}
           onChange={(e) => setFrom(e.target.value)}
@@ -113,7 +109,7 @@ export function NewCard() {
       )}
       {url && (
         <>
-          <p style={{ marginTop: '1.4rem' }}>Copy this, then paste it into an email or message:</p>
+          <p style={{ marginTop: '1.4rem' }}>Copy this and paste it into a message:</p>
           <p
             style={{
               wordBreak: 'break-word',

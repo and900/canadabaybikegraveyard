@@ -25,7 +25,7 @@ export default function NewCardPage() {
   return (
     <div className="xmas" data-theme="midnight">
       <div className="xmas-bg" aria-hidden="true" />
-      <main>
+      <main className="xmas-top">
         <NewCard />
       </main>
     </div>
