@@ -3,6 +3,7 @@ import { MotionToggle } from './MotionToggle'
 
 const PAGES = [
   { href: '/why', label: 'Why this page exists' },
+  { href: '/c/new', label: 'Christmas cards' },
   { href: '/privacy', label: 'Privacy' },
   { href: '/accessibility', label: 'Accessibility' },
   { href: '/terms', label: 'Terms' },
