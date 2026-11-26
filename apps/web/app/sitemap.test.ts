@@ -16,6 +16,8 @@ describe('the sitemap and robots.txt', () => {
 
   it('points to the sitemap and keeps crawlers out of the private areas', () => {
     const { rules, sitemap: map } = robots()
+    // Facebook's crawler gets its own rules, with the cards open to it.
+    expect(JSON.stringify(rules)).toContain('facebookexternalhit')
     expect(map).toBe(`${SITE}/sitemap.xml`)
     expect(JSON.stringify(rules)).toContain('"/other/"')
     expect(JSON.stringify(rules)).toContain('"/c/"')
