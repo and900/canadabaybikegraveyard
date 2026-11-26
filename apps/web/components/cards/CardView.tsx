@@ -3,6 +3,7 @@ import type { CardStyle, CardTheme } from '@iwb/shared'
 import Image from 'next/image'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { pauseChristmasMusic, startChristmasMusic, stopChristmasMusic } from './music'
+import { CardCorners } from './CardCorners'
 import { Santa } from './Santa'
 
 export type CardProps = {
@@ -187,6 +188,7 @@ export function CardView({ code, name, greeting, message, signoff, theme, style 
       </div>
 
       <Santa name={name} run={stage !== 'sealed'} />
+      {stage === 'open' && <CardCorners />}
 
       <main>
         {envelope && (
