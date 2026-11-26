@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: { default: 'Canada Bay Community Watch', template: '%s · Canada Bay Community Watch' },
   // What search results show under the title, and the fallback for every page that has none of its own.
   description:
-    'Report and map abandoned share bikes, problem parking, graffiti and damaged footpaths and roads in the Canada Bay area. No sign-up needed.',
+    'Canada Bay Community Watch – report and map obstructing and abandoned e-bikes, parking obstructions, graffiti and damaged roads and footpaths. No sign-up required.',
   // The bike's icons, named here rather than found as files, which every page, the cards' too, would list.
   icons: {
     icon: [
