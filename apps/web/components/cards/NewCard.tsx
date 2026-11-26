@@ -31,7 +31,7 @@ export function NewCard() {
   const toName = nameFromSlug(to.trim().replace(/\s+/g, '-'))
   const fromName = nameFromSlug(from.trim().replace(/\s+/g, '-'))
   const url = toName && fromName ? openCardUrl(location.origin, toName, fromName, style) : ''
-  const message = url ? `Merry Christmas, ${toName}! I made you a Christmas card. Open it here: ${url}` : ''
+  const message = url ? `Merry Christmas, ${toName}! A Christmas card for you. Open it here: ${url}` : ''
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(message)
