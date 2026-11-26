@@ -20,6 +20,8 @@ describe('the sitemap and robots.txt', () => {
     expect(JSON.stringify(rules)).toContain('"/other/"')
     expect(JSON.stringify(rules)).toContain('"/c/"')
     expect(JSON.stringify(rules)).toContain('"/c/new"')
+    // Facebook obeys robots.txt, so the card maker's preview picture has to be open too.
+    expect(JSON.stringify(rules)).toContain('"/c/og-new.jpg"')
     expect(JSON.stringify(rules)).toContain('"/cards-admin"')
   })
 })
