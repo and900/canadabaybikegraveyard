@@ -100,6 +100,26 @@ export default async function CardsAdmin({ searchParams }: { searchParams: Promi
         )}
       </section>
 
+      <section className="mt-6" aria-labelledby="promo-h">
+        <h2 id="promo-h" className="text-lg font-bold">
+          Promote the card maker
+        </h2>
+        <p className="text-muted">
+          For Facebook, paste the link on its own line: it shows the picture of the three designs. For email, Copy email
+          gives a message with that picture and a red button to paste into Outlook or Gmail.
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <CopyLink url={`${origin}/c/new`} />
+          <CopyEmail
+            url={`${origin}/c/new`}
+            imageUrl={`${origin}/c/og-new.jpg`}
+            heading="Make a free Christmas card for someone you love"
+            alt="Three Christmas card designs: Traditional, Aussie and Beach"
+            button="Make your Christmas card"
+          />
+        </div>
+      </section>
+
       <section className="mt-6" aria-labelledby="card-h">
         <h2 id="card-h" className="text-lg font-bold">
           The card everyone gets
