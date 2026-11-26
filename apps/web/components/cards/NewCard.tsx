@@ -1,6 +1,6 @@
 'use client'
 import { CARD_STYLES, type CardStyle, nameFromSlug, OPEN_NAME_MAX, openCardUrl } from '@iwb/shared'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const field = {
   font: 'inherit',
@@ -20,30 +20,65 @@ const button = {
   border: 0,
 } as const
 
-/** Type who it is for and who it is from, get the link and a message to send. Nothing is saved: the names are the link. */
+const escape = (text: string) =>
+  text.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
+
 const LABELS: Record<CardStyle, string> = { traditional: 'Traditional', aussie: 'Aussie', beach: 'Beach' }
 
+/** Type who it is for and who it is from, then copy it for a message or an email. Nothing is saved: the names are the link. */
 export function NewCard() {
   const [style, setStyle] = useState<CardStyle>('traditional')
   const [to, setTo] = useState('')
   const [from, setFrom] = useState('')
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState<'message' | 'email' | 'failed' | null>(null)
+  // The picture is drawn by the server, so it waits for a pause in typing.
+  const [picture, setPicture] = useState('')
   const toName = nameFromSlug(to.trim().replace(/\s+/g, '-'))
   const fromName = nameFromSlug(from.trim().replace(/\s+/g, '-'))
   const url = toName && fromName ? openCardUrl(location.origin, toName, fromName, style) : ''
   const message = url ? `Merry Christmas, ${toName}! A Christmas card for you. Open it here: ${url}` : ''
-  const copy = async () => {
+  const pictureUrl = toName ? `/c/og?${new URLSearchParams({ name: toName, style })}` : ''
+  useEffect(() => {
+    const timer = setTimeout(() => setPicture(pictureUrl), 600)
+    return () => clearTimeout(timer)
+  }, [pictureUrl])
+  const counted = () =>
+    void fetch('/api/c/count', {
+      method: 'POST',
+      body: JSON.stringify({ event: 'made', style }),
+      keepalive: true,
+    }).catch(() => {})
+  const done = (state: 'message' | 'email' | 'failed') => {
+    setCopied(state)
+    setTimeout(() => setCopied(null), 2200)
+  }
+  /** For WhatsApp, Messenger, texts and Instagram messages: plain words with the link, which they turn into a preview. */
+  const copyMessage = async () => {
     try {
       await navigator.clipboard.writeText(message)
-      void fetch('/api/c/count', {
-        method: 'POST',
-        body: JSON.stringify({ event: 'made', style }),
-        keepalive: true,
-      }).catch(() => {})
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      counted()
+      done('message')
     } catch {
-      // The text is on screen to copy by hand.
+      done('failed')
+    }
+  }
+  /** For Outlook and Gmail: the card's picture as a link, and a button. No bare address to look untidy. */
+  const copyEmail = async () => {
+    const picture = `${location.origin}/c/og?${new URLSearchParams({ name: toName ?? '', style })}`
+    const html = `<p style="font-size:18px">Merry Christmas, ${escape(toName ?? '')}!</p>
+<p><a href="${escape(url)}"><img src="${escape(picture)}" width="560" alt="A Christmas card for ${escape(toName ?? '')}" style="max-width:100%;border-radius:8px"></a></p>
+<p><a href="${escape(url)}" style="display:inline-block;background:#c8312f;color:#ffffff;font-weight:bold;font-size:18px;text-decoration:none;padding:12px 22px;border-radius:8px">Open your Christmas card</a></p>`
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([message], { type: 'text/plain' }),
+        }),
+      ])
+      counted()
+      done('email')
+    } catch {
+      done('failed')
     }
   }
   const bad = (value: string, clean: string | null) => value.trim() && !clean
@@ -109,23 +144,35 @@ export function NewCard() {
       )}
       {url && (
         <>
-          <p style={{ marginTop: '1.4rem' }}>Copy this and paste it into a message:</p>
-          <p
-            style={{
-              wordBreak: 'break-word',
-              fontSize: '0.95rem',
-              textAlign: 'left',
-              background: '#fff',
-              color: '#222',
-              padding: 12,
-              borderRadius: 8,
-            }}
-          >
-            {message}
+          {picture === pictureUrl && (
+            // eslint-disable-next-line @next/next/no-img-element -- drawn by the server for this name
+            <img
+              src={picture}
+              alt={`Preview of the card for ${toName}`}
+              width={1200}
+              height={630}
+              style={{ display: 'block', margin: '0.6rem auto', width: 200, height: 'auto', borderRadius: 6 }}
+            />
+          )}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <button type="button" onClick={copyMessage} style={button}>
+              {copied === 'message' ? 'Copied!' : 'Copy for message'}
+            </button>
+            <button type="button" onClick={copyEmail} style={button}>
+              {copied === 'email' ? 'Copied!' : 'Copy for email'}
+            </button>
+          </div>
+          <p style={{ fontSize: '0.85rem', margin: '0.5rem 0 0' }}>
+            {copied === 'failed'
+              ? 'Could not copy. Your browser blocked it.'
+              : 'Message: WhatsApp, Messenger, texts, Instagram. Email: Outlook, Gmail.'}
           </p>
-          <button type="button" onClick={copy} style={button}>
-            {copied ? 'Copied!' : 'Copy'}
-          </button>
+          <details style={{ fontSize: '0.85rem', marginTop: 6 }}>
+            <summary style={{ cursor: 'pointer' }}>Show link</summary>
+            <p style={{ wordBreak: 'break-all', margin: '4px 0 0' }}>
+              <a href={url}>{url}</a>
+            </p>
+          </details>
         </>
       )}
     </section>
