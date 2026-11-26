@@ -3,8 +3,10 @@ import { NewCard } from '@/components/cards/NewCard'
 import '../card.css'
 
 export const metadata: Metadata = {
-  title: { absolute: 'Make a Christmas card' },
-  description: 'Type a name, copy the link, and send a Christmas card.',
+  title: { absolute: 'Free Christmas card maker – allmythingsonline.com' },
+  description:
+    'Make a free personalised Christmas card in 30 seconds. Choose Traditional, Aussie or Beach, add a name, and send it by text or email. No sign-up.',
+  alternates: { canonical: '/c/new' },
   icons: {
     icon: [
       { url: '/c/star.ico', sizes: '32x32', type: 'image/x-icon' },
@@ -18,7 +20,6 @@ export const metadata: Metadata = {
     type: 'website',
     images: [{ url: '/c/og-new.jpg', width: 1200, height: 630, alt: 'Three Christmas card designs' }],
   },
-  robots: { index: false, follow: false },
 }
 
 export default function NewCardPage() {
