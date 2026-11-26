@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { nameFromSlug, openCardUrl } from './cards'
+import { cardStyle, nameFromSlug, openCardUrl } from './cards'
 
 describe('nameFromSlug', () => {
   it('turns dashes into spaces', () => {
@@ -21,7 +21,19 @@ describe('nameFromSlug', () => {
   })
 })
 
+describe('cardStyle', () => {
+  it('falls back to the original', () => {
+    expect(cardStyle('aussie')).toBe('aussie')
+    expect(cardStyle('nonsense')).toBe('traditional')
+    expect(cardStyle(undefined)).toBe('traditional')
+  })
+})
+
 describe('openCardUrl', () => {
+  it('adds the scene unless it is the original', () => {
+    expect(openCardUrl('https://x.test', 'Nan', 'Bec', 'beach')).toBe('https://x.test/c/to/Nan?from=Bec&style=beach')
+    expect(openCardUrl('https://x.test', 'Nan', 'Bec', 'traditional')).toBe('https://x.test/c/to/Nan?from=Bec')
+  })
   it('round trips', () => {
     const url = openCardUrl('https://x.test', 'Tom and Hillary')
     expect(url).toBe('https://x.test/c/to/Tom-and-Hillary')

@@ -1,5 +1,5 @@
 'use client'
-import type { CardTheme } from '@iwb/shared'
+import type { CardStyle, CardTheme } from '@iwb/shared'
 import Image from 'next/image'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { pauseChristmasMusic, startChristmasMusic, stopChristmasMusic } from './music'
@@ -13,6 +13,8 @@ export type CardProps = {
   message: string
   signoff: string
   theme: CardTheme
+  /** The scene; the original when absent. */
+  style?: CardStyle
 }
 
 /** Where the tree's baubles twinkle, as a percentage of its picture. */
@@ -87,7 +89,7 @@ type Stage = 'sealed' | 'turning' | 'flap' | 'rising' | 'leaving' | 'open'
  * The card: a closed envelope addressed to the recipient. A tap turns it over, opens its flap, and out comes a folded
  * card with the village scene on its front, which opens to the message. Santa flies round the scene, towing a banner for his first two passes. Tapping the open card starts it all again. The first tap tells the site the card was opened.
  */
-export function CardView({ code, name, greeting, message, signoff, theme }: CardProps) {
+export function CardView({ code, name, greeting, message, signoff, theme, style }: CardProps) {
   const [stage, setStage] = useState<Stage>('sealed')
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
   const canvas = useSnow()
@@ -163,7 +165,7 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
   }, [stage])
 
   return (
-    <div className="xmas" data-theme={theme}>
+    <div className="xmas" data-theme={theme} data-scene={style}>
       <div className="xmas-bg" aria-hidden="true" />
       <canvas ref={canvas} aria-hidden="true" />
 

@@ -1,17 +1,17 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { nameFromSlug } from '@iwb/shared'
+import { cardStyle, nameFromSlug } from '@iwb/shared'
 import { ImageResponse } from 'next/og'
 
-export const alt = 'A Christmas card'
-export const size = { width: 1200, height: 630 }
-export const contentType = 'image/png'
+const size = { width: 1200, height: 630 }
 
 /** The picture a link to a card shows in WhatsApp, iMessage and email: the winter village, and "A Christmas card for Nan". */
-export default async function Image({ params }: { params: Promise<{ name: string }> }) {
-  const name = nameFromSlug((await params).name)
+export async function GET(request: Request) {
+  const query = new URL(request.url).searchParams
+  const name = nameFromSlug(query.get('name') ?? '')
+  const style = cardStyle(query.get('style'))
   const [background, font] = await Promise.all([
-    readFile(join(process.cwd(), 'lib/cards-assets/og-base.jpg')),
+    readFile(join(process.cwd(), `lib/cards-assets/${style === 'traditional' ? 'og-base' : `og-base-${style}`}.jpg`)),
     readFile(join(process.cwd(), 'lib/cards-assets/mountains-of-christmas-latin-700-normal.woff')),
   ])
   const to = name ?? 'you'

@@ -89,9 +89,18 @@ export function nameFromSlug(slug: string): string | null {
   return name
 }
 
-/** The link for an open card: spaces become dashes, and who it is from rides along as `?from=`. */
-export const openCardUrl = (origin: string, name: string, from?: string) => {
+/** The scenes an open card can be made in. The first is the original, and what a link without a style gets. */
+export const CARD_STYLES = ['traditional', 'aussie', 'beach'] as const
+export type CardStyle = (typeof CARD_STYLES)[number]
+export const cardStyle = (value: unknown): CardStyle =>
+  CARD_STYLES.includes(value as CardStyle) ? (value as CardStyle) : 'traditional'
+
+/** The link for an open card: spaces become dashes; who it is from and the scene ride along as `?from=` and `?style=`. */
+export const openCardUrl = (origin: string, name: string, from?: string, style?: CardStyle) => {
   const base = `${origin}/c/to/${encodeURIComponent(name.trim().replace(/\s+/g, '-'))}`
+  const query = new URLSearchParams()
   const sender = from?.trim().replace(/\s+/g, '-')
-  return sender ? `${base}?from=${encodeURIComponent(sender)}` : base
+  if (sender) query.set('from', sender)
+  if (style && style !== 'traditional') query.set('style', style)
+  return query.size ? `${base}?${query}` : base
 }

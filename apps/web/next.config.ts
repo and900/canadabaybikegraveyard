@@ -13,7 +13,7 @@ export default withBotId({
   // The Christmas card's link preview reads its picture and font from disk.
   outputFileTracingIncludes: {
     '/c/[code]/opengraph-image': ['./lib/cards-assets/**'],
-    '/c/to/[name]/opengraph-image': ['./lib/cards-assets/**'],
+    '/c/og': ['./lib/cards-assets/**'],
   },
   // pmtiles' fallback inflater, which no supported browser needs (see map/no-fflate.ts).
   turbopack: { resolveAlias: { fflate: { browser: './map/no-fflate.ts' } } },

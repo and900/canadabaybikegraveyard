@@ -1,5 +1,5 @@
 'use client'
-import { nameFromSlug, OPEN_NAME_MAX, openCardUrl } from '@iwb/shared'
+import { CARD_STYLES, type CardStyle, nameFromSlug, OPEN_NAME_MAX, openCardUrl } from '@iwb/shared'
 import { useState } from 'react'
 
 const field = {
@@ -21,13 +21,16 @@ const button = {
 } as const
 
 /** Type who it is for and who it is from, get the link and a message to send. Nothing is saved: the names are the link. */
+const LABELS: Record<CardStyle, string> = { traditional: 'Traditional', aussie: 'Aussie', beach: 'Beach' }
+
 export function NewCard() {
+  const [style, setStyle] = useState<CardStyle>('traditional')
   const [to, setTo] = useState('')
   const [from, setFrom] = useState('')
   const [copied, setCopied] = useState(false)
   const toName = nameFromSlug(to.trim().replace(/\s+/g, '-'))
   const fromName = nameFromSlug(from.trim().replace(/\s+/g, '-'))
-  const url = toName && fromName ? openCardUrl(location.origin, toName, fromName) : ''
+  const url = toName && fromName ? openCardUrl(location.origin, toName, fromName, style) : ''
   const message = url ? `Merry Christmas, ${toName}! I made you a Christmas card. Open it here: ${url}` : ''
   const copy = async () => {
     try {
@@ -63,6 +66,39 @@ export function NewCard() {
           style={field}
         />
       </label>
+      <div style={{ margin: '1rem 0' }}>
+        <span style={{ display: 'block', marginBottom: 6 }}>Design</span>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 10 }}>
+          {CARD_STYLES.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setStyle(option)}
+              aria-pressed={style === option}
+              style={{
+                font: 'inherit',
+                fontSize: '0.9rem',
+                padding: 4,
+                borderRadius: 10,
+                background: style === option ? '#c8312f' : 'transparent',
+                color: style === option ? '#fff' : 'inherit',
+                border: '2px solid ' + (style === option ? '#c8312f' : '#b9b0a0'),
+                cursor: 'pointer',
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- a small fixed picture */}
+              <img
+                src={`/c/thumb-${option}.webp`}
+                alt=""
+                width={75}
+                height={134}
+                style={{ display: 'block', borderRadius: 6 }}
+              />
+              {LABELS[option]}
+            </button>
+          ))}
+        </div>
+      </div>
       {(bad(to, toName) || bad(from, fromName)) && (
         <p>Letters and spaces only, please, up to {OPEN_NAME_MAX} of them.</p>
       )}

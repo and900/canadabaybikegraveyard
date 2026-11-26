@@ -10,6 +10,7 @@
   --paper: #fff8ec;
   --ink: #2a2233;
   --accent: #c8312f;
+  --scene: url('/c/bg.webp');
   --glow: #ffd36b;
   --edge: #e8dcc4;
   --tint: transparent;
@@ -37,11 +38,22 @@
 }
 
 /* The painted night, fixed behind everything; a theme tints its sky and leaves the village warm. */
+.xmas[data-scene='aussie'] {
+  --scene: url('/c/bg-aussie.webp');
+}
+.xmas[data-scene='beach'] {
+  --scene: url('/c/bg-beach.webp');
+}
+/* No snow falls on a summer night. */
+.xmas[data-scene='aussie'] canvas,
+.xmas[data-scene='beach'] canvas {
+  display: none;
+}
 .xmas-bg {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: url('/c/bg.webp') center bottom / cover no-repeat;
+  background: var(--scene) center bottom / cover no-repeat;
 }
 .xmas-bg::after {
   content: '';
@@ -170,7 +182,7 @@
   aspect-ratio: 3 / 2;
   border: 6px solid #fff;
   border-radius: 4px;
-  background: url('/c/bg.webp') center 85% / cover no-repeat;
+  background: var(--scene) center 85% / cover no-repeat;
   box-shadow: 0 6px 18px #0006;
   z-index: 0;
   visibility: hidden;
@@ -312,7 +324,7 @@
   inset: 0;
   border: 10px solid #fff;
   border-radius: 6px;
-  background: url('/c/bg.webp') center 85% / cover no-repeat;
+  background: var(--scene) center 85% / cover no-repeat;
   box-shadow:
     0 20px 50px #0007,
     inset 0 0 0 1px #0002;
