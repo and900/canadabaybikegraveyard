@@ -24,16 +24,16 @@ const button = {
 export function NewCard() {
   const [to, setTo] = useState('')
   const [from, setFrom] = useState('')
-  const [copied, setCopied] = useState<'link' | 'message' | null>(null)
+  const [copied, setCopied] = useState(false)
   const toName = nameFromSlug(to.trim().replace(/\s+/g, '-'))
   const fromName = nameFromSlug(from.trim().replace(/\s+/g, '-'))
   const url = toName && fromName ? openCardUrl(location.origin, toName, fromName) : ''
   const message = url ? `Merry Christmas, ${toName}! I made you a Christmas card. Open it here: ${url}` : ''
-  const copy = async (kind: 'link' | 'message', text: string) => {
+  const copy = async () => {
     try {
-      await navigator.clipboard.writeText(text)
-      setCopied(kind)
-      setTimeout(() => setCopied(null), 2000)
+      await navigator.clipboard.writeText(message)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     } catch {
       // The text is on screen to copy by hand.
     }
@@ -42,14 +42,14 @@ export function NewCard() {
   return (
     <section className="xmas-sheet" style={{ textAlign: 'center' }}>
       <h1 style={{ fontSize: '2.2rem', color: 'var(--accent)' }}>Make a Christmas card</h1>
-      <p style={{ fontSize: '1.1rem', lineHeight: 1.5 }}>Type who it is for and who it is from, then copy the link.</p>
+      <p style={{ fontSize: '1.1rem', lineHeight: 1.5 }}>Type who it is for and who it is from.</p>
       <label style={{ display: 'block', margin: '1rem 0' }}>
         <span style={{ display: 'block', marginBottom: 6 }}>To</span>
         <input
           value={to}
           onChange={(e) => setTo(e.target.value)}
           maxLength={OPEN_NAME_MAX}
-          placeholder="Tom and Hillary"
+          placeholder="Josh and Maddie"
           style={field}
         />
       </label>
@@ -59,7 +59,7 @@ export function NewCard() {
           value={from}
           onChange={(e) => setFrom(e.target.value)}
           maxLength={OPEN_NAME_MAX}
-          placeholder="Sam and Jo"
+          placeholder="Bec"
           style={field}
         />
       </label>
@@ -68,13 +68,7 @@ export function NewCard() {
       )}
       {url && (
         <>
-          <p style={{ wordBreak: 'break-all', fontSize: '0.95rem' }}>
-            <a href={url}>{url}</a>
-          </p>
-          <button type="button" onClick={() => copy('link', url)} style={button}>
-            {copied === 'link' ? 'Copied!' : 'Copy link'}
-          </button>
-          <p style={{ marginTop: '1.4rem' }}>Or paste this into an email or message:</p>
+          <p style={{ marginTop: '1.4rem' }}>Copy this, then paste it into an email or message:</p>
           <p
             style={{
               wordBreak: 'break-word',
@@ -88,8 +82,8 @@ export function NewCard() {
           >
             {message}
           </p>
-          <button type="button" onClick={() => copy('message', message)} style={button}>
-            {copied === 'message' ? 'Copied!' : 'Copy message'}
+          <button type="button" onClick={copy} style={button}>
+            {copied ? 'Copied!' : 'Copy'}
           </button>
         </>
       )}
