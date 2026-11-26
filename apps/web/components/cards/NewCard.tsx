@@ -45,7 +45,44 @@ export function NewCard() {
   return (
     <section className="xmas-sheet" style={{ textAlign: 'center' }}>
       <h1 style={{ fontSize: '2.2rem', color: 'var(--accent)' }}>Make a Christmas card</h1>
-      <p style={{ fontSize: '1.1rem', lineHeight: 1.5 }}>Type who it is for and who it is from.</p>
+      <p style={{ fontSize: '1.1rem', lineHeight: 1.5 }}>
+        Choose a design, then type who it is for and who it is from.
+      </p>
+      <div style={{ margin: '1rem 0' }}>
+        <span style={{ display: 'block', marginBottom: 6 }}>Pick a design</span>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+          {CARD_STYLES.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setStyle(option)}
+              aria-pressed={style === option}
+              style={{
+                font: 'inherit',
+                fontSize: '0.9rem',
+                padding: 4,
+                flex: '1 1 0',
+                maxWidth: 120,
+                borderRadius: 10,
+                background: style === option ? '#c8312f' : 'transparent',
+                color: style === option ? '#fff' : 'inherit',
+                border: '2px solid ' + (style === option ? '#c8312f' : '#b9b0a0'),
+                cursor: 'pointer',
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- a small fixed picture */}
+              <img
+                src={`/c/thumb-${option}.webp`}
+                alt=""
+                width={75}
+                height={134}
+                style={{ display: 'block', borderRadius: 6, width: '100%', height: 'auto' }}
+              />
+              {LABELS[option]}
+            </button>
+          ))}
+        </div>
+      </div>
       <label style={{ display: 'block', margin: '1rem 0' }}>
         <span style={{ display: 'block', marginBottom: 6 }}>To</span>
         <input
@@ -66,39 +103,6 @@ export function NewCard() {
           style={field}
         />
       </label>
-      <div style={{ margin: '1rem 0' }}>
-        <span style={{ display: 'block', marginBottom: 6 }}>Design</span>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 10 }}>
-          {CARD_STYLES.map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => setStyle(option)}
-              aria-pressed={style === option}
-              style={{
-                font: 'inherit',
-                fontSize: '0.9rem',
-                padding: 4,
-                borderRadius: 10,
-                background: style === option ? '#c8312f' : 'transparent',
-                color: style === option ? '#fff' : 'inherit',
-                border: '2px solid ' + (style === option ? '#c8312f' : '#b9b0a0'),
-                cursor: 'pointer',
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- a small fixed picture */}
-              <img
-                src={`/c/thumb-${option}.webp`}
-                alt=""
-                width={75}
-                height={134}
-                style={{ display: 'block', borderRadius: 6 }}
-              />
-              {LABELS[option]}
-            </button>
-          ))}
-        </div>
-      </div>
       {(bad(to, toName) || bad(from, fromName)) && (
         <p>Letters and spaces only, please, up to {OPEN_NAME_MAX} of them.</p>
       )}
