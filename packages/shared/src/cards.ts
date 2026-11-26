@@ -45,3 +45,50 @@ export function parseRecipients(text: string): NewRecipient[] {
 
 /** The address of a recipient's card. */
 export const cardUrl = (origin: string, code: string) => `${origin}/c/${code}`
+
+/** The longest name an open card takes: it is typed into a link, so it is kept short. */
+export const OPEN_NAME_MAX = 30
+
+/** Words that never go on a card from the open page. Short on purpose: it stops the obvious, not every trick. */
+const BLOCKED = [
+  'fuck',
+  'shit',
+  'cunt',
+  'bitch',
+  'nigger',
+  'nigga',
+  'faggot',
+  'retard',
+  'whore',
+  'slut',
+  'cock',
+  'dick',
+  'nazi',
+  'rape',
+]
+
+/**
+ * The name in an open card's link (`/c/to/Tom-and-Hillary`): dashes and plus signs stand for spaces. Null when there is
+ * nothing usable: empty, too long, anything but letters, spaces, apostrophes, ampersands, full stops and commas, or a blocked word.
+ */
+export function nameFromSlug(slug: string): string | null {
+  let text: string
+  try {
+    text = decodeURIComponent(slug)
+  } catch {
+    return null
+  }
+  const name = text
+    .replace(/[-_+]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (!name || name.length > OPEN_NAME_MAX) return null
+  if (!/^[\p{L}][\p{L}\p{M} '’&.,]*$/u.test(name)) return null
+  const squashed = name.toLowerCase().replace(/[^\p{L}]/gu, '')
+  if (BLOCKED.some((word) => squashed.includes(word))) return null
+  return name
+}
+
+/** The link for an open card: spaces become dashes. */
+export const openCardUrl = (origin: string, name: string) =>
+  `${origin}/c/to/${encodeURIComponent(name.trim().replace(/\s+/g, '-'))}`

@@ -6,7 +6,8 @@ import { pauseChristmasMusic, startChristmasMusic, stopChristmasMusic } from './
 import { Santa } from './Santa'
 
 export type CardProps = {
-  code: string
+  /** Absent on an open card, which has no recipient to note an opening for. */
+  code?: string
   name: string
   greeting: string | null
   message: string
@@ -121,7 +122,7 @@ export function CardView({ code, name, greeting, message, signoff, theme }: Card
   const open = () => {
     if (stage !== 'sealed') return
     setStage('turning')
-    void fetch(`/api/c/${code}/open`, { method: 'POST', keepalive: true }).catch(() => {})
+    if (code) void fetch(`/api/c/${code}/open`, { method: 'POST', keepalive: true }).catch(() => {})
     const later = (ms: number, run: () => void) => timers.current.push(setTimeout(run, ms))
     // A slow dance: the flap opens; the card rises until it is clear of the envelope (and a little more) while the
     // envelope sinks; then the card descends to its place while the envelope drifts off to the lower right, its flap the
