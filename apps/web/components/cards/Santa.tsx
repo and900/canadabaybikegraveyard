@@ -1,15 +1,12 @@
 'use client'
 import Image from 'next/image'
 import { useEffect, useRef } from 'react'
-import { createFlight } from './flight'
-
-/** Where he flies: in front of the sky only, in front of the tree but behind the garland and text, or over everything. */
-const LAYERS = ['back', 'mid'] as const
+import { bandOf, createFlight } from './flight'
 
 /**
  * Santa's sleigh, flying round the scene for as long as the card is open. The flight is drawn here, a frame at a time,
- * and the gallop is a CSS loop on the pictures inside, so changing course never restarts the legs. The first crossing is
- * in front of everything; after each turn he flies at a new depth.
+ * and the gallop is a CSS loop on the pictures inside, so changing course never restarts the legs. He flies in the
+ * band between the garland along the top and the top of the card or envelope, so he is always above the card.
  */
 export function Santa({ name, run }: { name: string; run: boolean }) {
   const root = useRef<HTMLDivElement>(null)
@@ -20,32 +17,46 @@ export function Santa({ name, run }: { name: string; run: boolean }) {
     const tilt = lean.current
     if (!run || !element || !tilt) return
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const size = () => ({
-      width: innerWidth,
-      height: innerHeight,
-      sleighWidth: element.offsetWidth,
-      sleighHeight: element.offsetHeight,
-    })
-    const flight = createFlight(size())
-    const resize = () => flight.resize(size())
+    const size = () => {
+      const banner = document.querySelector('.xmas-holly')?.getBoundingClientRect().bottom ?? 0
+      const card = document.querySelector('.xmas-card, .xmas-env')?.getBoundingClientRect().top ?? innerHeight * 0.6
+      return {
+        width: innerWidth,
+        height: innerHeight,
+        sleighWidth: element.offsetWidth,
+        sleighHeight: element.offsetHeight,
+        top: banner,
+        // A thin band, as on a short phone, is given room for the sleigh rather than sending him off the screen.
+        bottom: Math.max(card, banner + element.offsetHeight * 1.1),
+      }
+    }
+    let view = size()
+    const flight = createFlight(view)
+    const resize = () => flight.resize((view = size()))
     addEventListener('resize', resize)
     let angle = 0
     let last = 0
     let frame = 0
-    let layer = 0
     let turns = 0
+    let measured = 0
     element.dataset.tow = ''
     const draw = (now: number) => {
       const seconds = Math.min(0.05, (now - last) / 1000 || 0)
       last = now
-      const { x, y, vx, vy, turned } = flight.step(seconds)
-      element.dataset.layer ||= 'front'
+      // The card moves while it opens, so the band is measured again a few times a second.
+      if (now - measured > 250) {
+        measured = now
+        flight.resize((view = size()))
+      }
+      const step = flight.step(seconds)
+      const { x, vx, vy, turned } = step
+      // Whatever the curve does, he never dips below the band's lowest line or rises above its highest.
+      const { low, high } = bandOf(view)
+      const y = Math.max(low, Math.min(high, step.y))
+      element.dataset.layer = 'front'
       if (turned) {
         // The banner and its rope are for the first two passes only.
         if (++turns === 2) delete element.dataset.tow
-        // His first turn ends the crossing in front of everything; then he picks a depth each time he turns.
-        element.dataset.layer = LAYERS[layer++ % LAYERS.length]
-        if (Math.random() < 0.5) layer++
         if (flight.direction < 0) element.dataset.left = ''
         else delete element.dataset.left
       }

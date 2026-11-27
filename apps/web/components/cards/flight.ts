@@ -11,6 +11,9 @@ export type View = {
   /** The sleigh, in px. */
   sleighWidth: number
   sleighHeight: number
+  /** The band he flies in, in px from the top of the screen: under the banner and above the card. Optional. */
+  top?: number
+  bottom?: number
 }
 export type Frame = Point & {
   /** Velocity, px a second. */
@@ -34,16 +37,26 @@ export function catmullRom(p0: Point, p1: Point, p2: Point, p3: Point, t: number
  */
 export const flightSpeed = (view: View) => 0.6 * ((view.width + view.sleighWidth) / 10)
 
+/** The lowest and highest centre of the sleigh: inside the band if given, else the old limits for the screen. */
+export function bandOf(view: View) {
+  if (view.top !== undefined && view.bottom !== undefined) {
+    const low = view.top + view.sleighHeight / 2
+    return { low, high: Math.max(low, view.bottom - view.sleighHeight / 2) }
+  }
+  const low = view.sleighHeight * 0.7
+  // On a phone the card fills the bottom third, so he keeps to the sky above it.
+  const high = Math.max(
+    low,
+    Math.min(view.height - view.sleighHeight * 0.7, view.height * (view.width < 600 ? 0.64 : 0.85)),
+  )
+  return { low, high }
+}
+
 export function createFlight(initial: View, random: () => number = Math.random) {
   let view = initial
-  /** A height he can fly at, keeping the sleigh on the screen. */
+  /** A height he can fly at, keeping the sleigh inside the band (or on the screen, when there is no band). */
   const height = (from: number, to: number) => {
-    const low = view.sleighHeight * 0.7
-    // On a phone the card fills the bottom third, so he keeps to the sky above it.
-    const high = Math.max(
-      low,
-      Math.min(view.height - view.sleighHeight * 0.7, view.height * (view.width < 600 ? 0.64 : 0.85)),
-    )
+    const { low, high } = bandOf(view)
     return low + (high - low) * (from + (to - from) * random())
   }
   // The next waypoint alternates between a turning point at an edge, where he is half off the screen, and a point

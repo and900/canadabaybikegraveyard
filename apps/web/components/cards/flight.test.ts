@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { catmullRom, createFlight, flightSpeed } from './flight'
+import { bandOf, catmullRom, createFlight, flightSpeed } from './flight'
 
 const view = { width: 1000, height: 700, sleighWidth: 300, sleighHeight: 108 }
 
@@ -19,6 +19,26 @@ describe('catmullRom', () => {
     ] as const
     expect(catmullRom(a, b, c, d, 0)).toEqual(b)
     expect(catmullRom(a, b, c, d, 1)).toEqual(c)
+  })
+})
+
+describe('createFlight in a band', () => {
+  it('stays between the banner and the card', () => {
+    const banded = { ...view, top: 120, bottom: 360 }
+    const flight = createFlight(banded, seeded(11))
+    const { low, high } = bandOf(banded)
+    expect(low).toBe(120 + 54)
+    expect(high).toBe(360 - 54)
+    for (let i = 0; i < 60 * 120; i++) {
+      const { y } = flight.step(1 / 60)
+      // The curve can overshoot a little between waypoints; the card clamps it, so the waypoints themselves stay in.
+      expect(y).toBeGreaterThan(low - 60)
+      expect(y).toBeLessThan(high + 60)
+    }
+  })
+
+  it('gives a band too thin for the sleigh a single height', () => {
+    expect(bandOf({ ...view, top: 100, bottom: 110 }).high).toBe(bandOf({ ...view, top: 100, bottom: 110 }).low)
   })
 })
 

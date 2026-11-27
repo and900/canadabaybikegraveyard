@@ -2,23 +2,9 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-function Star() {
-  return (
-    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-      <path
-        d="M12 1.8l3 6.6 7.2.8-5.4 4.8 1.6 7.1L12 17.4 5.6 21.1l1.6-7.1L1.8 9.2 9 8.4z"
-        fill="#f6c343"
-        stroke="#b8861b"
-        strokeWidth="1"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
 /**
- * Two stars in the bottom corners of a card that has been opened: one to make a card of your own, and one that opens a
- * small About panel over the card, so closing it brings the card back as it was.
+ * Two buttons in the bottom corners of a card that has been opened: one to make a card of your own, and one that opens
+ * a small About panel over the card, so closing it brings the card back as it was.
  */
 export function CardCorners() {
   const [about, setAbout] = useState(false)
@@ -31,12 +17,12 @@ export function CardCorners() {
   return (
     <>
       <button type="button" className="xmas-corner xmas-corner-left" onClick={() => setAbout(true)}>
-        <Star />
-        About
+        {/* eslint-disable-next-line @next/next/no-img-element -- fixed artwork */}
+        <img src="/c/btn-about.webp" alt="About" width={254} height={100} />
       </button>
       <Link href="/c/new" className="xmas-corner xmas-corner-right">
-        <Star />
-        Create Your Own Card
+        {/* eslint-disable-next-line @next/next/no-img-element -- fixed artwork */}
+        <img src="/c/btn-create.webp" alt="Create Your Own Card" width={469} height={100} />
       </Link>
       {about && (
         <div
@@ -47,6 +33,14 @@ export function CardCorners() {
           onClick={() => setAbout(false)}
         >
           <div className="xmas-about-box" onClick={(event) => event.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- fixed logo */}
+            <img
+              src="/c/logo-words.webp"
+              alt="All My Things Online"
+              width={230}
+              height={130}
+              style={{ margin: '0 auto 6px' }}
+            />
             <h2 id="xmas-about-h">About</h2>
             <p>Christmas cards by allmythingsonline.com. Making your own is free and takes about 30 seconds.</p>
             <p>

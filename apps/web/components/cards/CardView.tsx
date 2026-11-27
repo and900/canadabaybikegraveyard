@@ -174,6 +174,7 @@ export function CardView({ code, name, greeting, message, signoff, theme, style 
 
   return (
     <div className="xmas" data-theme={theme} data-scene={style}>
+      <div className="xmas-bg-fill" aria-hidden="true" />
       <div className="xmas-bg" aria-hidden="true" />
       <canvas ref={canvas} aria-hidden="true" />
 
@@ -205,12 +206,17 @@ export function CardView({ code, name, greeting, message, signoff, theme, style 
             <span ref={peek} className="xmas-peek" aria-hidden="true" />
             <span className="xmas-turn">
               <span className="xmas-face xmas-front">
-                <span className="xmas-stamp">★</span>
+                <span className="xmas-stamp">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- a small fixed logo */}
+                  <img src="/c/logo.webp" alt="" width={220} height={219} />
+                </span>
                 <span className="xmas-label">To: {name}</span>
               </span>
               <span className="xmas-face xmas-back">
                 <span className="xmas-flap" />
                 <span className="xmas-seal">★</span>
+                {/* eslint-disable-next-line @next/next/no-img-element -- a small fixed logo */}
+                <img className="xmas-brand" src="/c/logo-words.webp" alt="" width={460} height={259} />
               </span>
             </span>
             {stage === 'sealed' && <span className="xmas-hint">Tap to open</span>}
