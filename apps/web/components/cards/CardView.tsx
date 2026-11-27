@@ -174,7 +174,6 @@ export function CardView({ code, name, greeting, message, signoff, theme, style 
 
   return (
     <div className="xmas" data-theme={theme} data-scene={style}>
-      <div className="xmas-bg-fill" aria-hidden="true" />
       <div className="xmas-bg" aria-hidden="true" />
       <canvas ref={canvas} aria-hidden="true" />
 
