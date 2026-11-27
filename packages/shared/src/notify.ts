@@ -14,6 +14,14 @@ const SAYS: Record<(typeof CATEGORIES.bikes.problems)[number], string> = {
   abandoned: 'abandoned',
 }
 
+/** Who is writing and what the site is, before the report, with a page that shows what a report looks like. */
+const introduction = (origin: string) =>
+  'Hello,\n\n' +
+  "I'm a Canada Bay resident, reporting through Canada Bay Community Watch, a free community map that helps residents " +
+  'tell operators and the council about problems like this. ' +
+  `You can see what a report looks like here: ${origin}/sample\n\n`
+const THANKS = '\n\nThank you for your help.'
+
 /**
  * The email about a tag to its operator, with its `mailto:` link and Gmail and Outlook.com compose pages for a device
  * with no email app, or null for a "Not sure" tag, which has no one to
@@ -31,19 +39,23 @@ export function operatorEmail(tag: PublicTag, origin: string, registration?: str
     const bike = bikeName(tag.operator)
     subject = `${bike}, ${PROBLEMS[tag.problem].toLowerCase()}, ${place}`
     message =
+      introduction(origin) +
       `I am reporting that there is ${withArticle(bike)} ${SAYS[tag.problem as keyof typeof SAYS]} near ${place}.\n\n` +
       `Coordinates: ${tag.lat}, ${tag.lng}\n` +
-      `Tagged on Canada Bay Community Watch: ${link}`
+      `Tagged on Canada Bay Community Watch: ${link}` +
+      THANKS
   } else {
     const category = CATEGORIES[tag.category]
     subject = `${category.short}: ${PROBLEMS[tag.problem]}, ${place}`
     message =
+      introduction(origin) +
       `I am reporting a problem near ${place}.\n\n` +
       `Category: ${category.label}\n` +
       `Issue: ${PROBLEMS[tag.problem]}\n` +
       (registration ? `Registration: ${registration}\n` : '') +
       `Coordinates: ${tag.lat}, ${tag.lng}\n` +
-      `Logged on Canada Bay Community Watch: ${link}`
+      `Logged on Canada Bay Community Watch: ${link}` +
+      THANKS
   }
   // A mailto body breaks its lines with CRLF (RFC 6068).
   const body = encodeURIComponent(message.replaceAll('\n', '\r\n'))
